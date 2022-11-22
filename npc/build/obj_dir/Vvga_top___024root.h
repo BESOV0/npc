@@ -28,16 +28,17 @@ VL_MODULE(Vvga_top___024root) {
     VL_OUT8(VGA_B,7,0);
 
     // LOCAL SIGNALS
-    CData/*0:0*/ vga_top__DOT__my_vmem__DOT__move_h;
-    CData/*0:0*/ vga_top__DOT__my_vmem__DOT__move_v;
+    CData/*0:0*/ vga_top__DOT__my_vmem__DOT__flag;
     SData/*9:0*/ vga_top__DOT__h_addr;
     SData/*9:0*/ vga_top__DOT__v_addr;
     SData/*9:0*/ vga_top__DOT__my_vga_ctrl__DOT__x_cnt;
     SData/*9:0*/ vga_top__DOT__my_vga_ctrl__DOT__y_cnt;
-    SData/*9:0*/ vga_top__DOT__my_vmem__DOT__X_Block;
-    SData/*9:0*/ vga_top__DOT__my_vmem__DOT__Y_Block;
+    SData/*9:0*/ vga_top__DOT__my_vmem__DOT__x_cnt;
+    SData/*9:0*/ vga_top__DOT__my_vmem__DOT__y_cnt;
+    SData/*9:0*/ vga_top__DOT__my_vmem__DOT__v_addrr;
+    SData/*9:0*/ vga_top__DOT__my_vmem__DOT__h_addrr;
     IData/*23:0*/ vga_top__DOT__vga_data;
-    IData/*31:0*/ vga_top__DOT__my_vmem__DOT__count;
+    VlUnpacked<SData/*11:0*/, 4096> vga_top__DOT__my_vmem__DOT__vga_mem;
 
     // LOCAL VARIABLES
     CData/*0:0*/ __Vclklast__TOP__clk;
