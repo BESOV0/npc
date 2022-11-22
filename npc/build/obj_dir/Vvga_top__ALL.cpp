@@ -2,5 +2,6 @@
 #define VL_INCLUDE_OPT include
 #include "Vvga_top.cpp"
 #include "Vvga_top___024root.cpp"
+#include "Vvga_top__ConstPool_0.cpp"
 #include "Vvga_top___024root__Slow.cpp"
 #include "Vvga_top__Syms.cpp"

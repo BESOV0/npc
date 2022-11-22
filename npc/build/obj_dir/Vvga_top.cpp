@@ -11,6 +11,8 @@ Vvga_top::Vvga_top(VerilatedContext* _vcontextp__, const char* _vcname__)
     : vlSymsp{new Vvga_top__Syms(_vcontextp__, _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , rst{vlSymsp->TOP.rst}
+    , ps2_clk{vlSymsp->TOP.ps2_clk}
+    , ps2_data{vlSymsp->TOP.ps2_data}
     , VGA_CLK{vlSymsp->TOP.VGA_CLK}
     , VGA_HSYNC{vlSymsp->TOP.VGA_HSYNC}
     , VGA_VSYNC{vlSymsp->TOP.VGA_VSYNC}

@@ -66,5 +66,3 @@ assign  Word_Loc = ((x_cnt0 << 4) + (y_cnt0 << 9) + v_addrr0) ; //相应字符�
       end
  
 endmodule
-     
-     

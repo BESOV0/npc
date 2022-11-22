@@ -26,6 +26,8 @@ class Vvga_top VL_NOT_FINAL {
     // propagate new values into/out from the Verilated model.
     VL_IN8(&clk,0,0);
     VL_IN8(&rst,0,0);
+    VL_IN8(&ps2_clk,0,0);
+    VL_IN8(&ps2_data,0,0);
     VL_OUT8(&VGA_CLK,0,0);
     VL_OUT8(&VGA_HSYNC,0,0);
     VL_OUT8(&VGA_VSYNC,0,0);

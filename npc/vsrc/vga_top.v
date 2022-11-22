@@ -1,6 +1,8 @@
 module vga_top(
     input clk,
     input rst,
+    input ps2_clk,
+    input ps2_data,
     output VGA_CLK,
     output VGA_HSYNC,
     output VGA_VSYNC,
@@ -14,7 +16,8 @@ assign VGA_CLK = clk;
 wire [9:0] h_addr;
 wire [9:0] v_addr;
 wire [23:0] vga_data;
-
+wire [7:0]ascaii;
+wire sflag;
 vga my_vga_ctrl(
     .clk(clk),
     .rst(rst),
@@ -29,9 +32,20 @@ vga my_vga_ctrl(
     .vga_b(VGA_B)
 );
 
-vmem my_vmem(
+vga_keyboard u_vga_keyboard(
     .clk(clk),
     .rst(rst),
+    .ps2_clk(ps2_clk),
+    .ps2_data(ps2_data),
+    .sflag(sflag),
+    .ascaii(ascaii)
+);
+
+vga_vmem my_vmem(
+    .clk(clk),
+    .rst(rst),
+    .ascaii(ascaii),
+    .sflag(sflag),
     .h_addr(h_addr),
     .v_addr(v_addr),
     .vga_data(vga_data)
