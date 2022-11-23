@@ -37,6 +37,10 @@ VL_MODULE(Vvga_top___024root) {
     CData/*0:0*/ vga_top__DOT__u_vga_keyboard__DOT__counttt_full;
     CData/*0:0*/ vga_top__DOT__u_vga_keyboard__DOT__en_counttt;
     CData/*0:0*/ vga_top__DOT__u_vga_keyboard__DOT__sampling;
+    CData/*0:0*/ vga_top__DOT__my_vmem__DOT__bdat1;
+    CData/*0:0*/ vga_top__DOT__my_vmem__DOT__bdat2;
+    CData/*0:0*/ vga_top__DOT__my_vmem__DOT__press_flag;
+    CData/*1:0*/ vga_top__DOT__my_vmem__DOT__clear;
     SData/*9:0*/ vga_top__DOT__h_addr;
     SData/*9:0*/ vga_top__DOT__v_addr;
     SData/*9:0*/ vga_top__DOT__my_vga_ctrl__DOT__x_cnt;
@@ -56,6 +60,9 @@ VL_MODULE(Vvga_top___024root) {
 
     // LOCAL VARIABLES
     CData/*0:0*/ vga_top__DOT__u_vga_keyboard__DOT____Vlvbound1;
+    CData/*7:0*/ vga_top__DOT__my_vmem__DOT____Vlvbound1;
+    CData/*7:0*/ vga_top__DOT__my_vmem__DOT____Vlvbound2;
+    CData/*7:0*/ vga_top__DOT__my_vmem__DOT____Vlvbound3;
     CData/*0:0*/ __Vclklast__TOP__clk;
     CData/*0:0*/ __Vclklast__TOP__rst;
 

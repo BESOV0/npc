@@ -18,6 +18,7 @@ wire [9:0] v_addr;
 wire [23:0] vga_data;
 wire [7:0]ascaii;
 wire sflag;
+wire flag;
 vga my_vga_ctrl(
     .clk(clk),
     .rst(rst),
@@ -38,6 +39,7 @@ vga_keyboard u_vga_keyboard(
     .ps2_clk(ps2_clk),
     .ps2_data(ps2_data),
     .sflag(sflag),
+    .flag(flag),
     .ascaii(ascaii)
 );
 
@@ -46,6 +48,7 @@ vga_vmem my_vmem(
     .rst(rst),
     .ascaii(ascaii),
     .sflag(sflag),
+    .flag(flag),
     .h_addr(h_addr),
     .v_addr(v_addr),
     .vga_data(vga_data)

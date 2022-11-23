@@ -4,17 +4,19 @@ module vga_keyboard(
     input ps2_clk,
     input ps2_data,
     output sflag,//成功接受数据标志
+    output flag,//松开按键标志
     output reg [7:0] ascaii
 );
     reg [9:0] buffer; // 存储ps2_data
     reg [3:0] count;  // 计数ps2_data bits
     
     reg [2:0] ps2_clk_sync;    
-//计时器延缓显示时间模块
+
+
   reg counttt_full;
   reg [31:0] counttt;
   reg en_counttt;
- always @ (posedge clk or negedge rst)
+  always @ (posedge clk or negedge rst)
     begin
     if(!rst)
      counttt <= 32'b0;
@@ -27,19 +29,18 @@ module vga_keyboard(
      begin
        if (!rst)
          counttt_full <= 1'b0;
-       else if (counttt == 32'd5000000)
+       else if (counttt == 32'd50000)
          counttt_full <=1'b1;
        else
          counttt_full <= 1'b0;
      end  
-     
 //记录ps2时钟数据，判断下降沿
     always @(posedge clk)
      begin
         ps2_clk_sync <=  {ps2_clk_sync[1:0],ps2_clk};
      end
     wire sampling = ps2_clk_sync[2] & ~ps2_clk_sync[1];//检测到下降沿sampling置1
-   //assign flag = (sampling ==1) && (count == 4'd10) && (buffer[0] == 0) && (ps2_data) && (^buffer[9:1]) && (buffer[8:1] == 8'hF0);//松开按键标志
+   assign flag = (sampling ==1) && (count == 4'd10) && (buffer[0] == 0) && (ps2_data) && (^buffer[9:1]) && (buffer[8:1] == 8'hF0);//松开按键标志
 //ASCII码转换
   always @(posedge clk or negedge rst) 
     begin
@@ -199,15 +200,71 @@ module vga_keyboard(
                ascaii <= 8'h0d;
                en_counttt <=1'b1;
                end
+               8'hf0:begin
+               ascaii <= 8'hff;
+               en_counttt <=1'b1;               
+               end
+               8'h4e:begin
+               ascaii <= 8'h2d;
+               en_counttt <=1'b1;
+               end
+               8'h55:begin
+               ascaii <= 8'h3d;
+               en_counttt <=1'b1;
+               end
+               8'h5d:begin
+               ascaii <= 8'h5c;
+               en_counttt <=1'b1;
+               end
+               8'h54:begin
+               ascaii <= 8'h5b;
+               en_counttt <=1'b1;
+               end
+               8'h5b:begin
+               ascaii <= 8'h5d;
+               en_counttt <=1'b1;
+               end
+               8'h4c:begin
+               ascaii <= 8'h3b;
+               en_counttt <=1'b1;
+               end
+               8'h52:begin
+               ascaii <= 8'h27;
+               en_counttt <=1'b1;
+               end
+               8'h41:begin
+               ascaii <= 8'h2c;
+               en_counttt <=1'b1;
+               end
+               8'h49:begin
+               ascaii <= 8'h2e;
+               en_counttt <=1'b1;
+               end
+               8'h4a:begin
+               ascaii <= 8'h2f;
+               en_counttt <=1'b1;
+               end
+               8'h0e:begin
+               ascaii <= 8'h60;
+               en_counttt <=1'b1;
+               end
+               8'h29:begin
+               ascaii <= 8'h20;
+               en_counttt <=1'b1;
+               end
+               8'h66:begin
+               ascaii <= 8'hf0;
+               en_counttt <=1'b1;
+               end
             default:begin
-               ascaii <= 8'b0;
+               ascaii <= 8'hff;
                en_counttt <=1'b0;
                end
             endcase
           end
-      else if (counttt_full==1'b1)
+      else if (counttt_full)
          begin 
-            ascaii <= 8'b0;
+            ascaii <= 8'hff;
             en_counttt <=1'b0;
          end   
      end       

@@ -32,7 +32,6 @@ void Vvga_top___024root___settle__TOP__2(Vvga_top___024root* vlSelf) {
     // Variables
     CData/*0:0*/ vga_top__DOT__my_vga_ctrl__DOT__h_valid;
     CData/*0:0*/ vga_top__DOT__my_vga_ctrl__DOT__v_valid;
-    CData/*7:0*/ vga_top__DOT__my_vmem__DOT____Vlvbound1;
     // Body
     vlSelf->VGA_CLK = vlSelf->clk;
     vlSelf->VGA_HSYNC = (0x60U < (IData)(vlSelf->vga_top__DOT__my_vga_ctrl__DOT__x_cnt));
@@ -57,11 +56,6 @@ void Vvga_top___024root___settle__TOP__2(Vvga_top___024root* vlSelf) {
                                                    + 
                                                    ((IData)(0x47U) 
                                                     * (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__y_cnt)))));
-    vga_top__DOT__my_vmem__DOT____Vlvbound1 = vlSelf->vga_top__DOT__ascaii;
-    if ((0x852U >= (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))) {
-        vlSelf->vga_top__DOT__my_vmem__DOT__ram[vlSelf->vga_top__DOT__my_vmem__DOT__count] 
-            = vga_top__DOT__my_vmem__DOT____Vlvbound1;
-    }
     vlSelf->vga_top__DOT__u_vga_keyboard__DOT__sampling 
         = (IData)((4U == (6U & (IData)(vlSelf->vga_top__DOT__u_vga_keyboard__DOT__ps2_clk_sync))));
     if (vga_top__DOT__my_vga_ctrl__DOT__h_valid) {
@@ -91,14 +85,14 @@ void Vvga_top___024root___initial__TOP__5(Vvga_top___024root* vlSelf) {
     Vvga_top__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vvga_top___024root___initial__TOP__5\n"); );
     // Variables
-    VlWide<5>/*159:0*/ __Vtemp6;
+    VlWide<5>/*159:0*/ __Vtemp5;
     // Body
-    __Vtemp6[0U] = 0x2e686578U;
-    __Vtemp6[1U] = 0x64617461U;
-    __Vtemp6[2U] = 0x7263652fU;
-    __Vtemp6[3U] = 0x65736f75U;
-    __Vtemp6[4U] = 0x72U;
-    VL_READMEM_N(true, 12, 4096, 0, VL_CVT_PACK_STR_NW(5, __Vtemp6)
+    __Vtemp5[0U] = 0x2e686578U;
+    __Vtemp5[1U] = 0x64617461U;
+    __Vtemp5[2U] = 0x7263652fU;
+    __Vtemp5[3U] = 0x65736f75U;
+    __Vtemp5[4U] = 0x72U;
+    VL_READMEM_N(true, 12, 4096, 0, VL_CVT_PACK_STR_NW(5, __Vtemp5)
                  ,  &(vlSelf->vga_top__DOT__my_vmem__DOT__vga_mem)
                  , 0, ~0ULL);
 }
@@ -161,6 +155,10 @@ void Vvga_top___024root___ctor_var_reset(Vvga_top___024root* vlSelf) {
     for (int __Vi0=0; __Vi0<4096; ++__Vi0) {
         vlSelf->vga_top__DOT__my_vmem__DOT__vga_mem[__Vi0] = 0;
     }
+    vlSelf->vga_top__DOT__my_vmem__DOT__bdat1 = 0;
+    vlSelf->vga_top__DOT__my_vmem__DOT__bdat2 = 0;
+    vlSelf->vga_top__DOT__my_vmem__DOT__press_flag = 0;
+    vlSelf->vga_top__DOT__my_vmem__DOT__clear = 0;
     vlSelf->vga_top__DOT__my_vmem__DOT__count = 0;
     for (int __Vi0=0; __Vi0<2131; ++__Vi0) {
         vlSelf->vga_top__DOT__my_vmem__DOT__ram[__Vi0] = 0;
@@ -171,4 +169,7 @@ void Vvga_top___024root___ctor_var_reset(Vvga_top___024root* vlSelf) {
     vlSelf->vga_top__DOT__my_vmem__DOT__y_cnt = 0;
     vlSelf->vga_top__DOT__my_vmem__DOT__cnt = 0;
     vlSelf->vga_top__DOT__my_vmem__DOT__ascaii0 = 0;
+    vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound1 = 0;
+    vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound2 = 0;
+    vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound3 = 0;
 }

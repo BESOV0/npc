@@ -16,8 +16,8 @@ VL_INLINE_OPT void Vvga_top___024root___combo__TOP__1(Vvga_top___024root* vlSelf
 }
 
 extern const VlUnpacked<CData/*1:0*/, 8192> Vvga_top__ConstPool__TABLE_a476c45f_0;
-extern const VlUnpacked<CData/*7:0*/, 8192> Vvga_top__ConstPool__TABLE_558a85db_0;
-extern const VlUnpacked<CData/*0:0*/, 8192> Vvga_top__ConstPool__TABLE_ea5f80d8_0;
+extern const VlUnpacked<CData/*7:0*/, 8192> Vvga_top__ConstPool__TABLE_ec0001fa_0;
+extern const VlUnpacked<CData/*0:0*/, 8192> Vvga_top__ConstPool__TABLE_4aa6460a_0;
 
 VL_INLINE_OPT void Vvga_top___024root___sequent__TOP__3(Vvga_top___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
@@ -26,17 +26,31 @@ VL_INLINE_OPT void Vvga_top___024root___sequent__TOP__3(Vvga_top___024root* vlSe
     // Variables
     CData/*0:0*/ vga_top__DOT__my_vga_ctrl__DOT__h_valid;
     CData/*0:0*/ vga_top__DOT__my_vga_ctrl__DOT__v_valid;
-    CData/*7:0*/ vga_top__DOT__my_vmem__DOT____Vlvbound1;
     CData/*3:0*/ __Vdly__vga_top__DOT__u_vga_keyboard__DOT__count;
+    CData/*0:0*/ __Vdly__vga_top__DOT__my_vmem__DOT__press_flag;
+    CData/*1:0*/ __Vdly__vga_top__DOT__my_vmem__DOT__clear;
+    CData/*7:0*/ __Vdlyvval__vga_top__DOT__my_vmem__DOT__ram__v0;
+    CData/*0:0*/ __Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v0;
+    CData/*7:0*/ __Vdlyvval__vga_top__DOT__my_vmem__DOT__ram__v1;
+    CData/*0:0*/ __Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v1;
     SData/*12:0*/ __Vtableidx1;
     SData/*9:0*/ __Vdly__vga_top__DOT__my_vga_ctrl__DOT__x_cnt;
+    SData/*11:0*/ __Vdlyvdim0__vga_top__DOT__my_vmem__DOT__ram__v0;
+    SData/*11:0*/ __Vdly__vga_top__DOT__my_vmem__DOT__count;
+    SData/*11:0*/ __Vdlyvdim0__vga_top__DOT__my_vmem__DOT__ram__v1;
     IData/*31:0*/ __Vdly__vga_top__DOT__u_vga_keyboard__DOT__counttt;
     // Body
     __Vdly__vga_top__DOT__u_vga_keyboard__DOT__count 
         = vlSelf->vga_top__DOT__u_vga_keyboard__DOT__count;
+    __Vdly__vga_top__DOT__my_vmem__DOT__clear = vlSelf->vga_top__DOT__my_vmem__DOT__clear;
     __Vdly__vga_top__DOT__u_vga_keyboard__DOT__counttt 
         = vlSelf->vga_top__DOT__u_vga_keyboard__DOT__counttt;
     __Vdly__vga_top__DOT__my_vga_ctrl__DOT__x_cnt = vlSelf->vga_top__DOT__my_vga_ctrl__DOT__x_cnt;
+    __Vdly__vga_top__DOT__my_vmem__DOT__press_flag 
+        = vlSelf->vga_top__DOT__my_vmem__DOT__press_flag;
+    __Vdly__vga_top__DOT__my_vmem__DOT__count = vlSelf->vga_top__DOT__my_vmem__DOT__count;
+    __Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v0 = 0U;
+    __Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v1 = 0U;
     if (vlSelf->rst) {
         vlSelf->vga_top__DOT__my_vmem__DOT__x_cnt = 
             (0x3ffU & ((0U < (IData)(vlSelf->vga_top__DOT__h_addr))
@@ -47,40 +61,48 @@ VL_INLINE_OPT void Vvga_top___024root___sequent__TOP__3(Vvga_top___024root* vlSe
             (0x3ffU & ((0U < (IData)(vlSelf->vga_top__DOT__h_addr))
                         ? ((IData)(vlSelf->vga_top__DOT__v_addr) 
                            >> 4U) : (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__y_cnt)));
-        vlSelf->vga_top__DOT__my_vmem__DOT__count = 
-            (0xfffU & ((IData)(vlSelf->vga_top__DOT__sflag)
-                        ? ((IData)(1U) + (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))
-                        : ((0x852U == (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))
-                            ? 0U : (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))));
-        vlSelf->vga_top__DOT__vga_data = ((((0U < (IData)(vlSelf->vga_top__DOT__h_addr)) 
-                                            & ((0xbU 
-                                                >= 
-                                                (0xfU 
-                                                 & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__h_addrr))) 
-                                               & (vlSelf->vga_top__DOT__my_vmem__DOT__vga_mem
-                                                  [
-                                                  (0xfffU 
-                                                   & ((IData)(1U) 
-                                                      + 
-                                                      (((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__ascaii0) 
-                                                        << 4U) 
-                                                       + (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__v_addrr))))] 
-                                                  >> 
-                                                  (0xfU 
-                                                   & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__h_addrr))))) 
-                                           & (0U != (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__ascaii0)))
-                                           ? 0xffffffU
-                                           : 0U);
+        __Vdly__vga_top__DOT__my_vmem__DOT__clear = 
+            ((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__press_flag)
+              ? (3U & ((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__bdat2)
+                        ? ((IData)(1U) + (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__clear))
+                        : (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__clear)))
+              : 0U);
         __Vdly__vga_top__DOT__u_vga_keyboard__DOT__counttt 
             = ((IData)(vlSelf->vga_top__DOT__u_vga_keyboard__DOT__en_counttt)
                 ? ((IData)(1U) + vlSelf->vga_top__DOT__u_vga_keyboard__DOT__counttt)
                 : 0U);
+        vlSelf->vga_top__DOT__vga_data = ((((((0U < (IData)(vlSelf->vga_top__DOT__h_addr)) 
+                                              & ((0xbU 
+                                                  >= 
+                                                  (0xfU 
+                                                   & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__h_addrr))) 
+                                                 & (vlSelf->vga_top__DOT__my_vmem__DOT__vga_mem
+                                                    [
+                                                    (0xfffU 
+                                                     & ((IData)(1U) 
+                                                        + 
+                                                        (((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__ascaii0) 
+                                                          << 4U) 
+                                                         + (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__v_addrr))))] 
+                                                    >> 
+                                                    (0xfU 
+                                                     & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__h_addrr))))) 
+                                             & (0xffU 
+                                                != (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__ascaii0))) 
+                                            & (0xdU 
+                                               != (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__ascaii0))) 
+                                           & (0U != (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__ascaii0)))
+                                           ? 0xffffffU
+                                           : (((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count) 
+                                               == (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__cnt))
+                                               ? 0xffffffU
+                                               : 0U));
     } else {
         vlSelf->vga_top__DOT__my_vmem__DOT__x_cnt = 0U;
         vlSelf->vga_top__DOT__my_vmem__DOT__y_cnt = 0U;
-        vlSelf->vga_top__DOT__my_vmem__DOT__count = 0U;
-        vlSelf->vga_top__DOT__vga_data = 0U;
+        __Vdly__vga_top__DOT__my_vmem__DOT__clear = 0U;
         __Vdly__vga_top__DOT__u_vga_keyboard__DOT__counttt = 0U;
+        vlSelf->vga_top__DOT__vga_data = 0U;
     }
     if (vlSelf->rst) {
         if ((0x320U == (IData)(vlSelf->vga_top__DOT__my_vga_ctrl__DOT__x_cnt))) {
@@ -96,7 +118,69 @@ VL_INLINE_OPT void Vvga_top___024root___sequent__TOP__3(Vvga_top___024root* vlSe
         vlSelf->vga_top__DOT__my_vga_ctrl__DOT__y_cnt = 1U;
         __Vdly__vga_top__DOT__my_vga_ctrl__DOT__x_cnt = 1U;
     }
+    __Vdly__vga_top__DOT__my_vmem__DOT__press_flag 
+        = ((IData)(vlSelf->rst) & (((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__bdat2) 
+                                    & (0xffU == (IData)(vlSelf->vga_top__DOT__ascaii))) 
+                                   | ((1U != (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__clear)) 
+                                      & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__press_flag))));
+    if (vlSelf->rst) {
+        if (((((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__bdat2) 
+               & (0x80U > (IData)(vlSelf->vga_top__DOT__ascaii))) 
+              & (~ (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__press_flag))) 
+             & (0xdU != (IData)(vlSelf->vga_top__DOT__ascaii)))) {
+            vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound1 
+                = vlSelf->vga_top__DOT__ascaii;
+            if ((0x852U >= (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))) {
+                __Vdlyvval__vga_top__DOT__my_vmem__DOT__ram__v0 
+                    = vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound1;
+                __Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v0 = 1U;
+                __Vdlyvdim0__vga_top__DOT__my_vmem__DOT__ram__v0 
+                    = vlSelf->vga_top__DOT__my_vmem__DOT__count;
+            }
+            __Vdly__vga_top__DOT__my_vmem__DOT__count 
+                = (0xfffU & ((IData)(1U) + (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count)));
+        } else if ((((0xdU == (IData)(vlSelf->vga_top__DOT__ascaii)) 
+                     & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__bdat2)) 
+                    & (~ (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__press_flag)))) {
+            vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound2 
+                = vlSelf->vga_top__DOT__ascaii;
+            if ((0x852U >= (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))) {
+                __Vdlyvval__vga_top__DOT__my_vmem__DOT__ram__v1 
+                    = vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound2;
+                __Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v1 = 1U;
+                __Vdlyvdim0__vga_top__DOT__my_vmem__DOT__ram__v1 
+                    = vlSelf->vga_top__DOT__my_vmem__DOT__count;
+            }
+            __Vdly__vga_top__DOT__my_vmem__DOT__count 
+                = (0xfffU & ((IData)(1U) + (((IData)(0x47U) 
+                                             + (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count)) 
+                                            - VL_MODDIV_III(32, (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count), (IData)(0x47U)))));
+        } else if ((((0xf0U == (IData)(vlSelf->vga_top__DOT__ascaii)) 
+                     & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__bdat2)) 
+                    & (~ (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__press_flag)))) {
+            vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound3 = 0U;
+            if ((0x852U >= (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))) {
+                vlSelf->vga_top__DOT__my_vmem__DOT__ram[vlSelf->vga_top__DOT__my_vmem__DOT__count] 
+                    = vlSelf->vga_top__DOT__my_vmem__DOT____Vlvbound3;
+            }
+            __Vdly__vga_top__DOT__my_vmem__DOT__count 
+                = ((0U == (0xfffU & ((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count) 
+                                     - (IData)(1U))))
+                    ? 1U : (0xfffU & ((IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count) 
+                                      - (IData)(1U))));
+        } else {
+            __Vdly__vga_top__DOT__my_vmem__DOT__count 
+                = ((0x852U == (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))
+                    ? 0U : (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count));
+        }
+    } else {
+        __Vdly__vga_top__DOT__my_vmem__DOT__count = 0U;
+    }
     vlSelf->vga_top__DOT__my_vga_ctrl__DOT__x_cnt = __Vdly__vga_top__DOT__my_vga_ctrl__DOT__x_cnt;
+    vlSelf->vga_top__DOT__my_vmem__DOT__clear = __Vdly__vga_top__DOT__my_vmem__DOT__clear;
+    vlSelf->vga_top__DOT__my_vmem__DOT__count = __Vdly__vga_top__DOT__my_vmem__DOT__count;
+    vlSelf->vga_top__DOT__my_vmem__DOT__press_flag 
+        = __Vdly__vga_top__DOT__my_vmem__DOT__press_flag;
     vlSelf->VGA_R = (0xffU & (vlSelf->vga_top__DOT__vga_data 
                               >> 0x10U));
     vlSelf->VGA_G = (0xffU & (vlSelf->vga_top__DOT__vga_data 
@@ -124,22 +208,6 @@ VL_INLINE_OPT void Vvga_top___024root___sequent__TOP__3(Vvga_top___024root* vlSe
                 = (0xfU & (IData)(vlSelf->vga_top__DOT__v_addr));
         }
     }
-    __Vtableidx1 = (((IData)(vlSelf->vga_top__DOT__u_vga_keyboard__DOT__counttt_full) 
-                     << 0xcU) | (((IData)(vlSelf->vga_top__DOT__u_vga_keyboard__DOT__buffer) 
-                                  << 2U) | (((IData)(vlSelf->vga_top__DOT__sflag) 
-                                             << 1U) 
-                                            | (IData)(vlSelf->rst))));
-    if ((1U & Vvga_top__ConstPool__TABLE_a476c45f_0
-         [__Vtableidx1])) {
-        vlSelf->vga_top__DOT__ascaii = Vvga_top__ConstPool__TABLE_558a85db_0
-            [__Vtableidx1];
-    }
-    if ((2U & Vvga_top__ConstPool__TABLE_a476c45f_0
-         [__Vtableidx1])) {
-        vlSelf->vga_top__DOT__u_vga_keyboard__DOT__en_counttt 
-            = Vvga_top__ConstPool__TABLE_ea5f80d8_0
-            [__Vtableidx1];
-    }
     vlSelf->VGA_VSYNC = (2U < (IData)(vlSelf->vga_top__DOT__my_vga_ctrl__DOT__y_cnt));
     vga_top__DOT__my_vga_ctrl__DOT__v_valid = ((0x23U 
                                                 < (IData)(vlSelf->vga_top__DOT__my_vga_ctrl__DOT__y_cnt)) 
@@ -150,6 +218,32 @@ VL_INLINE_OPT void Vvga_top___024root___sequent__TOP__3(Vvga_top___024root* vlSe
                                                 < (IData)(vlSelf->vga_top__DOT__my_vga_ctrl__DOT__x_cnt)) 
                                                & (0x310U 
                                                   >= (IData)(vlSelf->vga_top__DOT__my_vga_ctrl__DOT__x_cnt)));
+    vlSelf->vga_top__DOT__my_vmem__DOT__bdat2 = ((IData)(vlSelf->rst) 
+                                                 & (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__bdat1));
+    __Vtableidx1 = (((IData)(vlSelf->vga_top__DOT__u_vga_keyboard__DOT__counttt_full) 
+                     << 0xcU) | (((IData)(vlSelf->vga_top__DOT__u_vga_keyboard__DOT__buffer) 
+                                  << 2U) | (((IData)(vlSelf->vga_top__DOT__sflag) 
+                                             << 1U) 
+                                            | (IData)(vlSelf->rst))));
+    if ((1U & Vvga_top__ConstPool__TABLE_a476c45f_0
+         [__Vtableidx1])) {
+        vlSelf->vga_top__DOT__ascaii = Vvga_top__ConstPool__TABLE_ec0001fa_0
+            [__Vtableidx1];
+    }
+    if ((2U & Vvga_top__ConstPool__TABLE_a476c45f_0
+         [__Vtableidx1])) {
+        vlSelf->vga_top__DOT__u_vga_keyboard__DOT__en_counttt 
+            = Vvga_top__ConstPool__TABLE_4aa6460a_0
+            [__Vtableidx1];
+    }
+    if (__Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v0) {
+        vlSelf->vga_top__DOT__my_vmem__DOT__ram[__Vdlyvdim0__vga_top__DOT__my_vmem__DOT__ram__v0] 
+            = __Vdlyvval__vga_top__DOT__my_vmem__DOT__ram__v0;
+    }
+    if (__Vdlyvset__vga_top__DOT__my_vmem__DOT__ram__v1) {
+        vlSelf->vga_top__DOT__my_vmem__DOT__ram[__Vdlyvdim0__vga_top__DOT__my_vmem__DOT__ram__v1] 
+            = __Vdlyvval__vga_top__DOT__my_vmem__DOT__ram__v1;
+    }
     vlSelf->vga_top__DOT__my_vmem__DOT__cnt = (0xfffU 
                                                & ((IData)(1U) 
                                                   + 
@@ -170,13 +264,10 @@ VL_INLINE_OPT void Vvga_top___024root___sequent__TOP__3(Vvga_top___024root* vlSe
                                      ? (0x3ffU & ((IData)(vlSelf->vga_top__DOT__my_vga_ctrl__DOT__x_cnt) 
                                                   - (IData)(0x91U)))
                                      : 0U);
-    vga_top__DOT__my_vmem__DOT____Vlvbound1 = vlSelf->vga_top__DOT__ascaii;
-    if ((0x852U >= (IData)(vlSelf->vga_top__DOT__my_vmem__DOT__count))) {
-        vlSelf->vga_top__DOT__my_vmem__DOT__ram[vlSelf->vga_top__DOT__my_vmem__DOT__count] 
-            = vga_top__DOT__my_vmem__DOT____Vlvbound1;
-    }
+    vlSelf->vga_top__DOT__my_vmem__DOT__bdat1 = ((IData)(vlSelf->rst) 
+                                                 & (IData)(vlSelf->vga_top__DOT__sflag));
     vlSelf->vga_top__DOT__u_vga_keyboard__DOT__counttt_full 
-        = ((IData)(vlSelf->rst) & (0x4c4b40U == vlSelf->vga_top__DOT__u_vga_keyboard__DOT__counttt));
+        = ((IData)(vlSelf->rst) & (0xc350U == vlSelf->vga_top__DOT__u_vga_keyboard__DOT__counttt));
     if (vlSelf->rst) {
         if (vlSelf->vga_top__DOT__u_vga_keyboard__DOT__sampling) {
             if ((0xaU == (IData)(vlSelf->vga_top__DOT__u_vga_keyboard__DOT__count))) {
