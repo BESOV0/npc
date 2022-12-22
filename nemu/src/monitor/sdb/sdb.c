@@ -12,12 +12,13 @@
 *
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
-
+#include <memory/paddr.h>
 #include <isa.h>
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "sdb.h"
+
 
 static int is_batch_mode = false;
 
@@ -54,6 +55,12 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args);
+
+static int cmd_info(char *args);
+
+static int cmd_x(char *args);
+
 static struct {
   const char *name;
   const char *description;
@@ -62,12 +69,74 @@ static struct {
   { "help", "Display information about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
+  { "si", "Single step debugging", cmd_si},
+  { "info", "information of reg", cmd_info},
+  { "x", "search mem", cmd_x },
   /* TODO: Add more commands */
 
 };
 
 #define NR_CMD ARRLEN(cmd_table)
+
+static int cmd_si(char *args){
+  int cnt;
+     if (args == NULL)
+        cnt = 1;
+     else
+     sscanf(args,"%d",&cnt);        
+     cpu_exec(cnt);
+  return 0;
+}
+
+static int cmd_info(char *args){
+   char *mode = args;
+   //sscanf(args,"%s",mode); 
+   if (strcmp(mode,"r") == 0)
+      isa_reg_display();
+   //else if ()
+   return 0;
+}
+
+word_t vaddr_read(vaddr_t addr, int len);
+
+static int cmd_x(char *args){
+
+   const char s[2]= " ";
+   //次数的字符串指针
+   char *len = strtok(args, s);
+   //地址的字符串指针
+   char *addr = strtok(NULL, s);
+   
+   
+   int n;
+   vaddr_t addrr;
+   unsigned int mem;
+   
+   char *str;
+   //数据类型转换
+   sscanf(len,"%d",&n); 
+   addrr = strtol(addr,&str,16);
+   /*
+   printf("char:%s \n" ,str);
+   printf("char:%s \n" ,addr);
+   printf("cishu:%d \n" ,n);
+   printf("addr:%lx  " ,addrr);
+   */
+   
+     for (int i = 0; i < n; i++) 
+     {
+         mem = vaddr_read(addrr + i * 4, 4);
+	 printf("0x%08lx	", addrr + i * 4);
+		for (int j = 0; j < 4; j++) 
+		{
+                    printf("0x%02x	" , mem & 0xff);
+                      mem = mem >> 8;
+		}
+		printf("\n");
+     }
+     
+  return 0;
+}
 
 static int cmd_help(char *args) {
   /* extract the first argument */
