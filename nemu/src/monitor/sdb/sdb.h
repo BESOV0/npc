@@ -17,7 +17,9 @@
 #define __SDB_H__
 
 #include <common.h>
-
 word_t expr(char *e, bool *success);
-
+int wp_info();
+void LIST_DEL(int num);
+void new_wps(char *str);
+bool watchpoints_expr();
 #endif

@@ -61,6 +61,12 @@ static int cmd_info(char *args);
 
 static int cmd_x(char *args);
 
+static int cmd_p(char *args);
+
+static int cmd_d(char *args);
+
+static int cmd_w(char *args);
+
 static struct {
   const char *name;
   const char *description;
@@ -72,6 +78,9 @@ static struct {
   { "si", "Single step debugging", cmd_si},
   { "info", "information of reg", cmd_info},
   { "x", "search mem", cmd_x },
+  { "p", "solve expr", cmd_p },
+  { "d", "delete watchpoint", cmd_d },
+  { "w", "set a watchpoint", cmd_w },
   /* TODO: Add more commands */
 
 };
@@ -93,7 +102,8 @@ static int cmd_info(char *args){
    //sscanf(args,"%s",mode); 
    if (strcmp(mode,"r") == 0)
       isa_reg_display();
-   //else if ()
+   else if (strcmp(mode,"w") == 0) 
+      wp_info();
    return 0;
 }
 
@@ -136,6 +146,27 @@ static int cmd_x(char *args){
      }
      
   return 0;
+}
+
+static int cmd_p(char *args){
+   bool success;
+   unsigned int expr_result;
+   success = true;
+   expr_result = expr(args,&success);
+   printf("result is %d\n",expr_result);
+   return 0;
+}
+
+static int cmd_d(char *args){
+   int num;
+   sscanf(args,"%d",&num);
+   LIST_DEL(num);
+   return 0;
+}
+
+static int cmd_w(char *args){
+    new_wps(args);
+    return 0;
 }
 
 static int cmd_help(char *args) {
@@ -194,7 +225,9 @@ void sdb_mainloop() {
     int i;
     for (i = 0; i < NR_CMD; i ++) {
       if (strcmp(cmd, cmd_table[i].name) == 0) {
-        if (cmd_table[i].handler(args) < 0) { return; }
+        if (cmd_table[i].handler(args) < 0) { 
+        nemu_state.state = NEMU_QUIT;
+        return; }
         break;
       }
     }
