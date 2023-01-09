@@ -30,6 +30,9 @@ override ARGS += $(ARGS_DIFF)
 # Command to execute NEMU
 IMG ?=
 NEMU_EXEC := $(BINARY) $(ARGS) $(IMG)
+	COUNT_COMMAND := $(shell grep -v ^$$ $$(find $$NEMU_HOME -name "*.c" -or -name "*.h") | wc -l)
+count:
+	@echo $(COUNT_COMMAND)
 
 run-env: $(BINARY) $(DIFF_REF_SO)
 
