@@ -341,7 +341,8 @@ void reg_expr(){
 	for (int i =0;i < nr_token;i++){
 		if (tokens[i].type == TK_REG){
 		//printf("%s\n",tokens[i].str + 1 );
-		Log("%s 0x%08lx", ANSI_FMT("The value of the reg is", ANSI_FG_RED),isa_reg_str2val(tokens[i].str + 1, &reg_success));
+		//printf("The value of the reg is 0x%016lx\n",isa_reg_str2val(tokens[i].str + 1, &reg_success));
+		Log("%s 0x%016lx", ANSI_FMT("The value of the reg is", ANSI_FG_RED),isa_reg_str2val(tokens[i].str + 1, &reg_success));
 		//temp = isa_reg_str2val(tokens[i].str + 1, &reg_success);
 		sprintf(tokens[i].str, "%lx", isa_reg_str2val(tokens[i].str + 1, &reg_success));		
 		//break;
