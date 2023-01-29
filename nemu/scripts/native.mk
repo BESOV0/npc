@@ -27,6 +27,10 @@ $(BINARY): compile_git
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 
+ifdef CONFIG_FTRACE
+override ARGS += --ftrace=$(BUILD_DIR)/recursion-riscv64-nemu.elf #change the elf file here
+endif
+
 # Command to execute NEMU
 IMG ?=
 NEMU_EXEC := $(BINARY) $(ARGS) $(IMG)

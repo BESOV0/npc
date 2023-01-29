@@ -17,13 +17,62 @@
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
-//#include "sdb.h"
+
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 200
+/////////////////////////////////////////////////////////ITRACR//////////////////////////////
+#define BUFFER_SIZE 16
+typedef struct {
+    unsigned int buffer[BUFFER_SIZE];
+    volatile unsigned int pW; //write addr
+    volatile unsigned int pR; //read addr
+    volatile unsigned int a;// counter
+}ring_buffer;
+
+void ring_buffer_init(ring_buffer *dst_buf)
+{
+    dst_buf->pW = 0;
+    dst_buf->pR = 0;
+    dst_buf->a = 0;
+}
+
+void ring_buffer_write(unsigned int c, ring_buffer *dst_buf)
+{
+    int i = (dst_buf->pW + 1)%BUFFER_SIZE;
+        dst_buf->buffer[dst_buf->pW] = c;
+        dst_buf->pW = i;
+        if(dst_buf->a < BUFFER_SIZE)
+    	dst_buf->a = dst_buf->a + 1;
+}
+
+int ring_buffer_read(unsigned int *c,ring_buffer *dst_buf)
+{
+	int count = 0;
+    	while(1){
+        	*c = dst_buf->buffer[dst_buf->pR];
+        	dst_buf->pR = (dst_buf->pR + 1)%BUFFER_SIZE;
+        	count++;
+        	if((count != BUFFER_SIZE) && ( count < (dst_buf->a))){
+        		++c;
+        	}
+        	else{
+        	dst_buf->pR = 0;
+        	break;
+        	}
+        } 
+    
+    return 0;
+}
+
+extern unsigned long int sym_value[9999];
+extern unsigned long int sym_size[9999]; 
+extern unsigned long int sym_name_num[9999];
+extern unsigned char strtable[9999];
+extern unsigned int sym_func_num;
 
 CPU_state cpu = {};
 uint64_t g_nr_guest_inst = 0;
@@ -45,12 +94,82 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
   }
 #endif
 }
-
-static void exec_once(Decode *s, vaddr_t pc) {
+//////////////////////////RINGBUF/////////////////////////////////
+unsigned int inst_ringbuff[BUFFER_SIZE]={};//ringbuff arry
+ring_buffer test_buffer;
+//////////////////////////////////////////////////
+#ifdef CONFIG_FTRACE
+uint32_t backcount = 0;//suojinduiqi
+#endif 
+static void exec_once(Decode *s, vaddr_t pc) {  
+  ring_buffer_write(pc,&test_buffer);
+//////////////////
   s->pc = pc;
   s->snpc = pc;
   isa_exec_once(s);
+/////////////////
+  ring_buffer_write(s->isa.inst.val,&test_buffer);
+  ring_buffer_read(inst_ringbuff,&test_buffer);
+////////////////
   cpu.pc = s->dnpc;
+#ifdef CONFIG_FTRACE
+	uint32_t finst = s->isa.inst.val;
+	uint32_t opcode = (finst & 0x0000007f);
+	uint32_t fun3 = (finst & 0x00007000) >> 12;
+	uint32_t rs1 = (finst & 0x000f8000) >> 15;
+	uint32_t rd = (finst & 0x00000f80) >> 7;	
+	bool jalorjalr = (opcode == 0x0000006f) || ((opcode == 0x00000067) && (fun3 == 0x00000000));
+	bool jalr =  (opcode == 0x00000067) && (fun3 == 0x00000000);
+	if( jalorjalr && (rd == 0x00000001)){
+		for(int icnt = 0; icnt < sym_func_num; icnt++){
+		unsigned char* pstr = strtable+sym_name_num[icnt];
+		if((cpu.pc >= sym_value[icnt]) && (cpu.pc < sym_value[icnt]+sym_size[icnt])){
+			if( backcount == 0){
+			backcount++;
+			printf("0x%016lx:call [%s@0x%016lx]\n",pc,pstr,sym_value[icnt]);
+			}
+			else{
+			uint32_t temp_backcount = backcount;
+			printf("0x%016lx:",pc);
+				while(temp_backcount--){
+				printf("  ");
+				}
+			printf("call [%s@0x%016lx]\n",pstr,sym_value[icnt]);
+			backcount++;
+			}
+		}
+		/*
+		else
+		printf("0x%016lx: call [%s@0x%016lx]\n",ftrace_pc,"???",sym_value[i]);
+		*/
+		}
+	}
+		
+	if( jalr && (rd == 0x00000000) && (rs1 == 0x00000001))
+	{
+		for(int icnt = 0; icnt < sym_func_num; icnt++){
+		unsigned char* pstr = strtable+sym_name_num[icnt];		
+		if((pc >= sym_value[icnt]) && (pc < sym_value[icnt]+sym_size[icnt])){
+			if(backcount == 0)
+			printf("0x%016lx:ret [%s]\n",pc,pstr);
+			else{
+			uint32_t temp_backcount = backcount -1;
+			printf("0x%016lx:",pc);
+				while(temp_backcount--){
+				printf("  ");
+				}
+			printf("ret [%s]\n",pstr);
+			backcount--;
+			}
+		}			
+		/*
+		else
+		printf("0x%016lx: ret [%s]\n",ftrace_pc,"???");
+		*/
+		}
+	}		
+#endif  
+  
 #ifdef CONFIG_ITRACE
   char *p = s->logbuf;
   p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
@@ -112,7 +231,7 @@ void cpu_exec(uint64_t n) {
   }
 
   uint64_t timer_start = get_time();
-
+  ring_buffer_init(&test_buffer);
   execute(n);
 
   uint64_t timer_end = get_time();
@@ -123,7 +242,21 @@ void cpu_exec(uint64_t n) {
 
     case NEMU_END: 
     case NEMU_ABORT:
-      Log("nemu: %s at pc = " FMT_WORD,
+/////////////////////////////////////////////////////////RINGBUFF////////////////////////////////////////////////////////////
+      for(int cc=0;cc< test_buffer.a;cc=cc+2){
+      	if(((nemu_state.state == NEMU_ABORT) || (nemu_state.state == NEMU_END && nemu_state.halt_ret != 0)) && (cc == test_buffer.pW-2)){
+      	Log("%s 0x%08x ", ANSI_FMT("BAD PC IS", ANSI_FG_RED),inst_ringbuff[cc]);
+      	//printf("BAD PC IS 0x%08x ",inst_ringbuff[cc]);
+      	Log("%s 0x%08x ", ANSI_FMT("BAD INST IS", ANSI_FG_RED),inst_ringbuff[cc+1]);
+      	}
+        else{
+        //printf("GOOD PC IS 0x%08x ",inst_ringbuff[cc]);
+        Log("%s 0x%08x", ANSI_FMT("GOOD PC IS", ANSI_FG_GREEN),inst_ringbuff[cc]);
+        Log("%s 0x%08x ", ANSI_FMT("GOOD INST IS", ANSI_FG_GREEN),inst_ringbuff[cc+1]);
+        }
+        }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	Log("nemu: %s at pc = " FMT_WORD,
           (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
            (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
             ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
@@ -132,3 +265,4 @@ void cpu_exec(uint64_t n) {
     case NEMU_QUIT: statistic();
   }
 }
+

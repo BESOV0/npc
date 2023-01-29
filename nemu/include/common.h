@@ -16,6 +16,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
 #include <stdbool.h>
@@ -29,6 +30,7 @@
 #else
 #include <assert.h>
 #include <stdlib.h>
+
 #endif
 
 #if CONFIG_MBASE + CONFIG_MSIZE > 0x100000000ul

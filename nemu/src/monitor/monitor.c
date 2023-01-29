@@ -15,6 +15,7 @@
 
 #include <isa.h>
 #include <memory/paddr.h>
+#include <elf.h>
 
 void init_rand();
 void init_log(const char *log_file);
@@ -42,6 +43,7 @@ static void welcome() {
 void sdb_set_batch_mode();
 
 static char *log_file = NULL;
+static char *ftrace_elf = NULL;
 static char *diff_so_file = NULL;
 static char *img_file = NULL;
 static int difftest_port = 1234;
@@ -67,11 +69,94 @@ static long load_img() {
   fclose(fp);
   return size;
 }
+////////////////////////////////////////////////////////////FTrace////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void ELF_header_64_parse(Elf64_Ehdr* ehdr , FILE *temp_fp) {
+    fseek(temp_fp, 0, SEEK_SET);
+    int ret = fread(ehdr, sizeof(Elf64_Ehdr), 1, temp_fp);
+    assert(ret == 1);
+}
 
+unsigned long int sym_value[9999];
+unsigned long int sym_size[9999]; 
+unsigned long int sym_name_num[9999];
+unsigned char strtable[9999];
+unsigned int sym_func_num;
+
+int section_header_64_parse(Elf64_Ehdr* ehdr, FILE *temp_fp) {
+    char shstrtable[9999];   
+    Elf64_Shdr shdr[9999];
+    Elf64_Sym  sym[9999];
+    int i,j =0,k = 0;
+    int count = ehdr->e_shnum;    //节区表的表项数
+    char *temp = shstrtable;
+    fseek(temp_fp, ehdr->e_shoff, SEEK_SET);
+    int ret = fread(shdr, sizeof(Elf64_Shdr), count, temp_fp);
+    if(ret == count){
+    Log("Selection head is GOOD");
+    }
+    fseek(temp_fp, shdr[ehdr->e_shstrndx].sh_offset, SEEK_SET);
+    ret = fread(shstrtable, 1, shdr[ehdr->e_shstrndx].sh_size, temp_fp);
+    for (i = 0; i< count ; i++){
+    	temp = shstrtable;
+    	temp = temp + shdr[i].sh_name;
+    	if(strcmp(temp,".symtab") == 0){
+    	fseek(temp_fp, shdr[i].sh_offset, SEEK_SET);
+    	ret = fread(sym, sizeof(Elf64_Sym),shdr[i].sh_size, temp_fp);
+    	if(ret == shdr[i].sh_size){
+   	Log("Symbol Selection is GOOD");
+   	}
+    	j = shdr[i].sh_size;
+    	}
+    	if(strcmp(temp,".strtab") == 0){
+    	fseek(temp_fp, shdr[i].sh_offset, SEEK_SET);
+    	ret = fread(strtable, 1,shdr[i].sh_size, temp_fp);
+    	if(ret == shdr[i].sh_size){
+   	Log("String Table is GOOD");
+   	}
+    	}   
+    } 
+    //symbol table find function
+    //printf(" symboltable size is %x\n",j);
+    for (i = 0; i< (j/24) ; i++){   
+    	if(ELF64_ST_TYPE(sym[i].st_info) == STT_FUNC){   	
+    		sym_value[k] = sym[i].st_value;
+    		sym_size[k] = sym[i].st_size; 
+    		sym_name_num[k] = sym[i].st_name;
+    		k++;
+    	}      
+    }
+    return k;
+}
+//#define FTRACETEST
+void init_ftrace(char* ftrace_elf) {
+	static Elf64_Ehdr ehdr[1];
+	// 打开文件
+	FILE* temp_fp;
+	temp_fp = fopen(ftrace_elf, "r");
+	if (NULL == temp_fp)
+	{
+		Log("fail to open the elf file or Ftrace is not enable");
+	}
+	else{
+	ELF_header_64_parse(ehdr,temp_fp);
+	sym_func_num = section_header_64_parse(ehdr,temp_fp);
+	}
+	#ifdef FTRACETEST
+	for (int i = 0; i< sym_func_num ;i++){
+	//printf("0x%016lx\n",sym_value[i]);
+	unsigned char* p = strtable+sym_name_num[i];
+	printf("%s %016lx %016lx\n",p,sym_value[i],sym_size[i]);	
+	}
+	#endif
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
     {"batch"    , no_argument      , NULL, 'b'},
     {"log"      , required_argument, NULL, 'l'},
+    {"ftrace"   , required_argument, NULL, 'f'},
     {"diff"     , required_argument, NULL, 'd'},
     {"port"     , required_argument, NULL, 'p'},
     {"help"     , no_argument      , NULL, 'h'},
@@ -83,6 +168,7 @@ static int parse_args(int argc, char *argv[]) {
       case 'b': sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
       case 'l': log_file = optarg; break;
+      case 'f': ftrace_elf = optarg; break;
       case 'd': diff_so_file = optarg; break;
       case 1: img_file = optarg; return 0;
       default:
@@ -90,6 +176,7 @@ static int parse_args(int argc, char *argv[]) {
         printf("\t-b,--batch              run with batch mode\n");
         printf("\t-l,--log=FILE           output log to FILE\n");
         printf("\t-d,--diff=REF_SO        run DiffTest with reference REF_SO\n");
+        printf("\t-f,--ftrace=FILE        read  elf file\n");
         printf("\t-p,--port=PORT          run DiffTest with port PORT\n");
         printf("\n");
         exit(0);
@@ -109,7 +196,10 @@ void init_monitor(int argc, char *argv[]) {
 
   /* Open the log file. */
   init_log(log_file);
-
+  
+  /* Open the elf file. */
+  init_ftrace(ftrace_elf);
+  
   /* Initialize memory. */
   init_mem();
 
