@@ -16,7 +16,6 @@ Vnpc::Vnpc(VerilatedContext* _vcontextp__, const char* _vcname__)
     , inst{vlSymsp->TOP.inst}
     , pc{vlSymsp->TOP.pc}
     , fdata{vlSymsp->TOP.fdata}
-    , __PVT____024unit{vlSymsp->TOP.__PVT____024unit}
     , rootp{&(vlSymsp->TOP)}
 {
 }

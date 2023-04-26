@@ -99,14 +99,13 @@ int section_header_64_parse(Elf64_Ehdr* ehdr, FILE *temp_fp) {
     ret = fread(shstrtable, 1, shdr[ehdr->e_shstrndx].sh_size, temp_fp);
     for (i = 0; i< count ; i++){
     	temp = shstrtable;
-    	temp = temp + shdr[i].sh_name;
+    	temp = temp + shdr[i].sh_name;    	
     	if(strcmp(temp,".symtab") == 0){
-    	fseek(temp_fp, shdr[i].sh_offset, SEEK_SET);
-    	ret = fread(sym, sizeof(Elf64_Sym),shdr[i].sh_size, temp_fp);
-    	if(ret == shdr[i].sh_size){
-   	Log("Symbol Selection is GOOD");
-   	}
     	j = shdr[i].sh_size;
+    	fseek(temp_fp, shdr[i].sh_offset, SEEK_SET);
+    	ret = fread(sym, sizeof(Elf64_Sym), (j / 24), temp_fp);
+    	if(ret == j / 24)
+   	Log("Symbol Selection is GOOD");  	
     	}
     	if(strcmp(temp,".strtab") == 0){
     	fseek(temp_fp, shdr[i].sh_offset, SEEK_SET);
@@ -170,7 +169,7 @@ static int parse_args(int argc, char *argv[]) {
       case 'l': log_file = optarg; break;
       case 'f': ftrace_elf = optarg; break;
       case 'd': diff_so_file = optarg; break;
-      case 1: img_file = optarg; return 0;
+      case 1: img_file = optarg;return 0;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
         printf("\t-b,--batch              run with batch mode\n");

@@ -1,7 +1,7 @@
 `include "defines.v"
 module ysyx_22050598_IDU(
 input [31:0] inst,
-output [63:0] imm,
+output signed [63:0] imm,
 output [63:0] immU,
 output [4:0] rs1,
 output [4:0] rs2,
@@ -43,19 +43,19 @@ assign inst_is_ALU_REG = (inst[6:0] == `ysyx_22050598_OPCODE_ALU_REG);
 assign inst_is_BREAK = (inst[6:0] == `ysyx_22050598_OPCODE_CSR_BREAK);
 assign opcode = inst[6:0];
 //decode type
-assign inst_type =  (inst_is_LUI | inst_is_AUIPC) ? `ysyx_22050598_U_TYPE  : 				//U-type
-	(inst_is_JAL) ? `ysyx_22050598_J_TYPE :		    	  					//J-type
-	(inst_is_JALR | inst_is_ALU_IMM | inst_is_BREAK | inst_is_LOAD) ? `ysyx_22050598_I_TYPE:   	//I-type
-	(inst_is_BRANCH) ? `ysyx_22050598_B_TYPE:              	 					//B-type
-	(inst_is_STORE) ? `ysyx_22050598_S_TYPE:		        				//S-type
-	(inst_is_ALU_REG) ? `ysyx_22050598_R_TYPE:		   					//R-type
-	6'b000000;											//N-type	
+assign inst_type =  {6{(inst_is_LUI | inst_is_AUIPC)}} & `ysyx_22050598_U_TYPE  | 				//U-type
+	{6{(inst_is_JAL)}} & `ysyx_22050598_J_TYPE |		    	  					//J-type
+	{6{(inst_is_JALR | inst_is_ALU_IMM | inst_is_BREAK | inst_is_LOAD)}} & `ysyx_22050598_I_TYPE |   	//I-type
+	{6{(inst_is_BRANCH)}} & `ysyx_22050598_B_TYPE |            	 					//B-type
+	{6{(inst_is_STORE)}} & `ysyx_22050598_S_TYPE  |		        					//S-type
+	{6{(inst_is_ALU_REG)}} & `ysyx_22050598_R_TYPE ;	   						//R-type
+											
 //decode signed imm
-wire [63:0] Iimm = {{53{inst[31]}}, inst[30:20]};
-wire [63:0] Simm = {{53{inst[31]}}, inst[30:25], inst[11:7]};
-wire [63:0] Bimm = {{52{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0};
-wire [63:0] Uimm = {{33{inst[31]}}, inst[30:12], 12'b0};
-wire [63:0] Jimm = {{44{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0};   
+wire signed [63:0] Iimm = {{53{inst[31]}}, inst[30:20]};
+wire signed [63:0] Simm = {{53{inst[31]}}, inst[30:25], inst[11:7]};
+wire signed [63:0] Bimm = {{52{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0};
+wire signed [63:0] Uimm = {{33{inst[31]}}, inst[30:12], 12'b0};
+wire signed [63:0] Jimm = {{44{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0};   
 //unsigned imm
 wire [63:0] IimmU = {52'b0, inst[31:20]};
 wire [63:0] SimmU = {52'b0, inst[31:25], inst[11:7]};

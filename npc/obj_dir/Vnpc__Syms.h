@@ -15,7 +15,6 @@
 
 // INCLUDE MODULE CLASSES
 #include "Vnpc___024root.h"
-#include "Vnpc___024unit.h"
 
 // DPI TYPES for DPI Export callbacks (Internal use)
 
@@ -30,7 +29,6 @@ class Vnpc__Syms final : public VerilatedSyms {
 
     // MODULE INSTANCE STATE
     Vnpc___024root                 TOP;
-    Vnpc___024unit                 TOP____024unit;
 
     // CONSTRUCTORS
     Vnpc__Syms(VerilatedContext* contextp, const char* namep, Vnpc* modelp);

@@ -7,6 +7,7 @@ module ysyx_22050598_RegisterFile (
   input ren,
   //output reg flag,
   output [63:0] rdata1,
+  output [63:0] ebreak_a0,
   input [4:0] raddr2, 
   output [63:0] rdata2
 );
@@ -19,7 +20,7 @@ module ysyx_22050598_RegisterFile (
     end
   end
   
-  
+    assign ebreak_a0 = rf[10];
     assign rdata1 = ((raddr1 != 5'b0) && (ren == 1'b1)) ? rf[raddr1] : 64'b0;
     assign rdata2 = ((raddr2 != 5'b0) && (ren == 1'b1)) ? rf[raddr2] : 64'b0;
 endmodule

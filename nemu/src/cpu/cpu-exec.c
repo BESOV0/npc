@@ -126,13 +126,13 @@ static void exec_once(Decode *s, vaddr_t pc) {
 		if((cpu.pc >= sym_value[icnt]) && (cpu.pc < sym_value[icnt]+sym_size[icnt])){
 			if( backcount == 0){
 			backcount++;
-			printf("0x%016lx:call [%s@0x%016lx]\n",pc,pstr,sym_value[icnt]);
+			printf("0x%016lx: call [%s@0x%016lx]\n",pc,pstr,sym_value[icnt]);
 			}
 			else{
 			uint32_t temp_backcount = backcount;
 			printf("0x%016lx:",pc);
 				while(temp_backcount--){
-				printf("  ");
+				printf("   ");
 				}
 			printf("call [%s@0x%016lx]\n",pstr,sym_value[icnt]);
 			backcount++;
@@ -151,12 +151,12 @@ static void exec_once(Decode *s, vaddr_t pc) {
 		unsigned char* pstr = strtable+sym_name_num[icnt];		
 		if((pc >= sym_value[icnt]) && (pc < sym_value[icnt]+sym_size[icnt])){
 			if(backcount == 0)
-			printf("0x%016lx:ret [%s]\n",pc,pstr);
+			printf("0x%016lx: ret [%s]\n",pc,pstr);
 			else{
 			uint32_t temp_backcount = backcount -1;
 			printf("0x%016lx:",pc);
 				while(temp_backcount--){
-				printf("  ");
+				printf("   ");
 				}
 			printf("ret [%s]\n",pstr);
 			backcount--;

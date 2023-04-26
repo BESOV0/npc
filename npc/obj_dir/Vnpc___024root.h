@@ -11,15 +11,12 @@
 
 class Vnpc__Syms;
 class Vnpc_VerilatedVcd;
-class Vnpc___024unit;
 
 
 //----------
 
 VL_MODULE(Vnpc___024root) {
   public:
-    // CELLS
-    Vnpc___024unit* __PVT____024unit;
 
     // PORTS
     VL_IN8(clk,0,0);
@@ -32,9 +29,14 @@ VL_MODULE(Vnpc___024root) {
     CData/*5:0*/ npc__DOT__inst_type;
     CData/*0:0*/ npc__DOT__ren;
     CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__inst_addi;
+    CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__inst_ebreak;
+    CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__inst_jalr;
+    CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__jump_flag;
+    QData/*63:0*/ npc__DOT__imm;
+    QData/*63:0*/ npc__DOT__rdata1;
+    QData/*63:0*/ npc__DOT__wdata;
     QData/*63:0*/ npc__DOT__u_ysyx_22050598_IFU__DOT__pc;
     QData/*63:0*/ npc__DOT__u_ysyx_22050598_IFU__DOT__pc_next;
-    QData/*63:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__sum;
     VlUnpacked<QData/*63:0*/, 32> npc__DOT__u_ysyx_22050598_RegisterFile__DOT__rf;
 
     // LOCAL VARIABLES

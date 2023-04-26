@@ -1,5 +1,6 @@
 	VSRC = $(wildcard ./vsrc/npc.v)
 	CSRC = $(wildcard ./csrc/npcmain.cpp)
+	IMG ?=
 all: default
 .PHONY:clean
 clean:
@@ -10,5 +11,7 @@ sim:
 	./obj_dir/Vnpc
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	gtkwave wave.vcd
+run:
+	./obj_dir/Vnpc $(IMG)
 .PHONY:sim	
 include ../Makefile

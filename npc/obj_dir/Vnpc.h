@@ -15,7 +15,6 @@ class Vnpc__Syms;
 class Vnpc___024root;
 class VerilatedVcdC;
 class Vnpc_VerilatedVcd;
-class Vnpc___024unit;
 
 
 // This class is the main interface to the Verilated model
@@ -38,7 +37,6 @@ class Vnpc VL_NOT_FINAL {
     // CELLS
     // Public to allow access to /* verilator public */ items.
     // Otherwise the application code can consider these internals.
-    Vnpc___024unit* const __PVT____024unit;
 
     // Root instance pointer to allow access to model internals,
     // including inlined /* verilator public_flat_* */ items.

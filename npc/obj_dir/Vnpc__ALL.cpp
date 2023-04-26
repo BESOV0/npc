@@ -2,10 +2,8 @@
 #define VL_INCLUDE_OPT include
 #include "Vnpc.cpp"
 #include "Vnpc___024root.cpp"
-#include "Vnpc___024unit.cpp"
 #include "Vnpc__Dpi.cpp"
 #include "Vnpc__Trace.cpp"
 #include "Vnpc___024root__Slow.cpp"
-#include "Vnpc___024unit__Slow.cpp"
 #include "Vnpc__Syms.cpp"
 #include "Vnpc__Trace__Slow.cpp"
