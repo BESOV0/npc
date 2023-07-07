@@ -26,10 +26,10 @@ VL_MODULE(Vnpc___024root) {
     VL_OUT64(fdata,63,0);
 
     // LOCAL SIGNALS
+    CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__inst_ebreak;
     CData/*5:0*/ npc__DOT__inst_type;
     CData/*0:0*/ npc__DOT__ren;
     CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__inst_addi;
-    CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__inst_ebreak;
     CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__inst_jalr;
     CData/*0:0*/ npc__DOT__u_ysyx_22050598_EXU__DOT__jump_flag;
     QData/*63:0*/ npc__DOT__imm;
@@ -43,6 +43,7 @@ VL_MODULE(Vnpc___024root) {
     CData/*4:0*/ __Vdlyvdim0__npc__DOT__u_ysyx_22050598_RegisterFile__DOT__rf__v0;
     CData/*0:0*/ __Vdlyvset__npc__DOT__u_ysyx_22050598_RegisterFile__DOT__rf__v0;
     CData/*0:0*/ __Vclklast__TOP__clk;
+    CData/*0:0*/ __Vclklast__TOP__npc__DOT__u_ysyx_22050598_EXU__DOT__inst_ebreak;
     QData/*63:0*/ __Vdlyvval__npc__DOT__u_ysyx_22050598_RegisterFile__DOT__rf__v0;
     VlUnpacked<CData/*0:0*/, 3> __Vm_traceActivity;
 

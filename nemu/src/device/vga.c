@@ -73,8 +73,13 @@ static inline void update_screen() {
 void vga_update_screen() {
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
+  if(vgactl_port_base[1] == 0) 
+  return;
+  update_screen();
+  vgactl_port_base[1] = 0;
 }
-
+//void add_mmio_map(const char *name, paddr_t addr, void *space, uint32_t len, io_callback_t callback)
+//maps[nr_map] = (IOMap){ .name = name, .low = addr, .high = addr + len - 1,.space = space, .callback = callback };
 void init_vga() {
   vgactl_port_base = (uint32_t *)new_space(8);
   vgactl_port_base[0] = (screen_width() << 16) | screen_height();

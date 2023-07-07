@@ -117,6 +117,12 @@ static int cmd_x(char *args){
    //地址的字符串指针
    char *addr = strtok(NULL, s);
    
+   if((addr == NULL) || (len == NULL))
+   {
+   printf("wrong format please try again\n");
+   printf("Format is x [N] [Location]\n");
+   return 0;
+   }
    
    int n;
    vaddr_t addrr;
@@ -126,23 +132,13 @@ static int cmd_x(char *args){
    //数据类型转换
    sscanf(len,"%d",&n); 
    addrr = strtol(addr,&str,16);
-   /*
-   printf("char:%s \n" ,str);
-   printf("char:%s \n" ,addr);
-   printf("cishu:%d \n" ,n);
-   printf("addr:%lx  " ,addrr);
-   */
+
    
      for (int i = 0; i < n; i++) 
      {
          mem = vaddr_read(addrr + i * 4, 4);
 	 printf("0x%08lx	", addrr + i * 4);
-		for (int j = 0; j < 4; j++) 
-		{
-                    printf("0x%02x	" , mem & 0xff);
-                      mem = mem >> 8;
-		}
-		printf("\n");
+	 printf("0x%08x\n",mem);
      }
      
   return 0;

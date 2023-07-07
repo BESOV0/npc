@@ -36,7 +36,7 @@ static void timer_intr() {
   }
 }
 #endif
-
+//void add_mmio_map(const char *name, paddr_t addr, void *space, uint32_t len, io_callback_t callback)
 void init_timer() {
   rtc_port_base = (uint32_t *)new_space(8);
 #ifdef CONFIG_HAS_PORT_IO

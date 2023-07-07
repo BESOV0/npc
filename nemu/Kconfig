@@ -125,6 +125,10 @@ config FTRACE
   bool "Enable FTRACE"
   default y
 
+config DTRACE
+  bool "Enable DTRACE"
+  default y
+  
 config TRACE
   bool "Enable tracer"
   default y

@@ -12,7 +12,9 @@ module ysyx_22050598_RegisterFile (
   output [63:0] rdata2
 );
   reg [63:0] rf [31:0];
-  
+   import "DPI-C" function void set_gpr_ptr(input logic [63:0] a []);
+   initial set_gpr_ptr(rf);
+
   always @(posedge clk) begin
     if (wen && (|waddr)) begin
     rf[waddr] <= wdata;

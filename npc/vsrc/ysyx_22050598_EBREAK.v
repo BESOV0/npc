@@ -3,10 +3,10 @@ module ysyx_22050598_EBREAK(
     input [63:0] ebreak_a0
 );
 
-import "DPI-C" function int ebreak(input longint ebreak_a0);
+import "DPI-C" function void ebreak(input longint ebreak_a0);
 
-always @(*) begin
-    if(ebreak_flag) 
+always @(posedge ebreak_flag) begin
+    //if(ebreak_flag) 
     ebreak(ebreak_a0);       
 end
 
