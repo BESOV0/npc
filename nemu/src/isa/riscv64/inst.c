@@ -59,6 +59,57 @@ static void decode_operand(Decode *s, int *dest, word_t *src1, word_t *src2, wor
   }
 }
 
+static vaddr_t rcsr(word_t imm) {
+  switch (imm)
+  {
+  case 0x342: return cpu.mcause;
+  case 0x341: return cpu.mepc;
+  case 0x300: return cpu.mstatus;
+  case 0x305: return cpu.mtvec;
+  default: panic("wrong rcsr imm");
+  }
+}
+
+static void wcsr(word_t imm,word_t data) {
+  switch (imm)
+  {
+  case 0x342: {cpu.mcause = data; return;}
+  case 0x341: {cpu.mepc = data; return;}
+  case 0x300: {cpu.mstatus = data; return;}
+  case 0x305: {cpu.mtvec = data; return;}
+  default: panic("wrong wcsr imm");
+  }
+}
+
+static void wocsr(word_t imm,word_t data) {
+  switch (imm)
+  {
+  case 0x342: {cpu.mcause |= data;return;}
+  case 0x341: {cpu.mepc |= data;return;}
+  case 0x300: {cpu.mstatus |= data;return;}
+  case 0x305: {cpu.mtvec |= data;return;}
+  default: panic("wrong wocsr imm");
+  }
+}
+
+static vaddr_t ecall(vaddr_t pc) { 
+	 bool success; 
+	 word_t temp = 0; 
+	 temp = isa_reg_str2val("a7", &success); 
+	if(success) 
+		return isa_raise_intr(temp,pc); 
+	else
+		panic("wrong reg str"); 
+}
+
+static vaddr_t mret() {
+ 	
+  	cpu.mstatus = ((cpu.mstatus & 0x0000000000000080) >> 8) ? (cpu.mstatus | 0x0000000000000008) : (cpu.mstatus & 0xfffffffffffffff7);
+  	cpu.mstatus |= 0x0000000000000080;
+  	return (cpu.mepc + 4);
+}
+
+
 static int decode_exec(Decode *s) {
   int dest = 0;
   word_t src1 = 0, src2 = 0, imm = 0;
@@ -69,6 +120,7 @@ static int decode_exec(Decode *s) {
   decode_operand(s, &dest, &src1, &src2, &imm, concat(TYPE_, type)); \
   __VA_ARGS__ ; \
 }
+
   INSTPAT_START();
   INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  , U, R(dest) = s->pc + (int64_t)imm);
   INSTPAT("??????? ????? ????? 011 ????? 00000 11", ld     , I, R(dest) = Mr(src1 + (int64_t)imm, 8));
@@ -144,8 +196,12 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000001 ????? ????? 110 ????? 01100 11", rem   , R, R(dest) = (int64_t)src1 % (int64_t)src2);
   //fceux add
   INSTPAT("??????? ????? ????? 110 ????? 00000 11", lwu   , I, R(dest) = SEXT(Mr(src1 + (int64_t)imm, 4),32));
-  
-  
+  //csr
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, R(dest) = rcsr(imm); wcsr(imm,src1));
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, R(dest) = rcsr(imm); wocsr(imm,src1));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , I, s->dnpc = ecall(s->pc));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , R, s->dnpc = mret());
+    
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();

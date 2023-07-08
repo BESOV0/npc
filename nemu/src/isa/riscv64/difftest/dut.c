@@ -16,7 +16,6 @@
 #include <isa.h>
 #include <cpu/difftest.h>
 #include "../local-include/reg.h"
-
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
 	Log("ref_pc is  %lx",ref_r->pc);
 	Log("dut_pc is  %lx",pc);
@@ -24,10 +23,26 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
 		if(cpu.gpr[i] != ref_r->gpr[i])
 			return false;			
 	}
+	
 	if(ref_r->pc != pc){
 	return false;
 	}
 	
+	if(ref_r->mcause != cpu.mcause){
+	return false;
+	}
+	
+	if(ref_r->mepc != cpu.mepc){
+	return false;
+	}
+	
+	if(ref_r->mstatus != cpu.mstatus){
+	return false;
+	}
+	
+	if(ref_r->mtvec != cpu.mtvec){
+	return false;
+	}
   return true;
 }
 
