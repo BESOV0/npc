@@ -106,7 +106,7 @@ static vaddr_t mret() {
  	
   	cpu.mstatus = ((cpu.mstatus & 0x0000000000000080) >> 8) ? (cpu.mstatus | 0x0000000000000008) : (cpu.mstatus & 0xfffffffffffffff7);
   	cpu.mstatus |= 0x0000000000000080;
-  	return (cpu.mepc + 4);
+  	return cpu.mepc;
 }
 
 
