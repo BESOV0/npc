@@ -26,10 +26,10 @@ const char *regs[] = {
 void isa_reg_display() {
    int i;
      for (i=0;i<32;i++){
-       if ((i+1)%4!=0)
-        printf("%s is %lx     ",regs[i],cpu.gpr[i]);
+       if ((i+1)%2!=0)
+        printf("%s is 0x%016lx  ",regs[i],cpu.gpr[i]);
        else
-        printf("%s is %lx\n",regs[i],cpu.gpr[i]);      
+        printf("%s is 0x%016lx\n",regs[i],cpu.gpr[i]);      
         }
 }
 

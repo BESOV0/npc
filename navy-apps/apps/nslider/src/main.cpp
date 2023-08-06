@@ -2,6 +2,7 @@
 #include <SDL_bmp.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #define W 400
 #define H 300
@@ -12,7 +13,7 @@
 //   gg - first page
 
 // number of slides
-const int N = 10;
+const int N = 6;
 // slides path pattern (starts from 0)
 const char *path = "/share/slides/slides-%d.bmp";
 
@@ -68,6 +69,7 @@ int main() {
         case SDLK_7: rep = rep * 10 + 7; break;
         case SDLK_8: rep = rep * 10 + 8; break;
         case SDLK_9: rep = rep * 10 + 9; break;
+        case SDLK_ESCAPE: exit(0); break;
         case SDLK_J:
         case SDLK_DOWN: next(rep); rep = 0; g = 0; break;
         case SDLK_K:

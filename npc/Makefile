@@ -10,7 +10,7 @@ sim:
 	make -C obj_dir -f Vnpc.mk Vnpc
 	./obj_dir/Vnpc
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	gtkwave wave.vcd
+	#gtkwave wave.vcd
 run:
 	./obj_dir/Vnpc $(IMG)
 .PHONY:sim	

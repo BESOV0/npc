@@ -45,6 +45,7 @@ VM_USER_CLASSES = \
 	expr \
 	log \
 	npcmain \
+	timer \
 	watchpoint \
 
 # User .cpp directories (from .cpp's on Verilator command line)
@@ -66,6 +67,8 @@ expr.o: ./csrc/expr.cpp
 log.o: ./csrc/log.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 npcmain.o: ./csrc/npcmain.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+timer.o: ./csrc/timer.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 watchpoint.o: ./csrc/watchpoint.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

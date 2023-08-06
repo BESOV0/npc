@@ -1,14 +1,14 @@
-#include "verilated_vcd_c.h" //可选，如果要导出vcd则需要加上
 #include "Vnpc.h"
-#include <svdpi.h>
-#include "Vnpc__Dpi.h"
-#include "verilated_dpi.h"
 #include "npc.h"
-#include <readline/readline.h>
-#include <readline/history.h>
-
 
 #define NR_CMD ARRLEN(cmd_table)
+//#define VCD_WAVE
+
+#ifdef VCD_WAVE
+#include "verilated_vcd_c.h"
+#endif
+
+
 
 vluint64_t main_time = 0;  //initial sim time
 Vnpc *top = new Vnpc("top");
@@ -21,10 +21,8 @@ double sc_time_stamp()
 {
     return main_time;
 }
-/////////////////////////////////////////////////////////////////NPC Command Part////////////////////////////////////////////////////////
-void simmain(unsigned long int exectime);
-unsigned int pmem_read (unsigned long int n);
-void dump_gpr();
+
+///////////////////////////////////NPC Command Part///////////////////////////
 static char* rl_gets() {
   static char *line_read = NULL;
 
@@ -75,19 +73,19 @@ static int cmd_x(char *args){
    return 0;
    }
    
-   int m,n,addr_temp;
-   unsigned int mem;
+   uint64_t m,n,addr_temp;
+   long long *mem;
+   mem =(long long*)malloc(sizeof(long long));
    char *str;
    addr_temp = strtol(addr,&str,16);
-   m = addr_temp - 0x80000000;
-   sscanf(len,"%d",&n); 
+   sscanf(len,"%ld",&n); 
    
 
      for (int i = 0; i < n; i++) 
      {
-         mem = pmem_read(m + i * 4);
-	 printf("0x%08x	   ",addr_temp + i * 4);
-	 printf("0x%08x\n",mem);
+         pmem_read(addr_temp + i * 4,mem);
+	 printf("0x%016lx  ",addr_temp + i * 4);
+	 printf("0x%016llx\n",*mem);
      }
      
   return 0;
@@ -139,9 +137,9 @@ static struct {
   /* TODO: Add more commands */
 
 };
-////////////////////////////////////////////////////////////////DPI-C Part//////////////////////////////////////////////////////////////
+//////////////////////////////////////DPI-C Part/////////////////////////////
 char ebreak_flag = 0;
-void ebreak(long long int code){
+extern "C" void ebreak(long long int code){
 	ebreak_flag = 1;
 	if(code == 0)
 	printf("HIT GOOD TRAP\n");
@@ -174,18 +172,14 @@ void dump_gpr(){
 unsigned long int isa_reg_str2val(const char *s) {
 	for (int i = 0;i<32;i++){	  
 	   if (strcmp("pc",s) == 0)
-	      return top->pc; 
+	      return top->pc_now; 
 	   else if(strcmp(regs[i],s) == 0)
 	      return cpu_gpr[i];
 	}
 	return 0;
 }
-////////////////////////////////////////////////////////////initial instrcution Part/////////////////////////////////////////////////////
-//16 8 4 2 1
- //000000001000 00000 000 11100 0010011
- //111111111100 11100 000 11101 0010011
- //000001000000 11101 000 11110 0010011
- //000000000000 00000 000 00000 1110011
+
+/*****************************initial instrcution Part****************************/
  //00800e13          	addi	t3,x0,8
  //ffce0e93          	addi	t4,t3,-4
  //040e8f13		addi	t5,t4,64
@@ -193,27 +187,101 @@ unsigned long int isa_reg_str2val(const char *s) {
  //000002b7             lui     t0,0
  //ff9ff2ef             jal     t0,-8  0xff,0x9f,0xf2,0xef
  //00100073		ebreak
-unsigned char instr[4096] ={0x00,0x80,0x0e,0x13,0xff,0xce,0x0e,0x93,0x04,0x0e,0x8f,0x13,0x00,0x00,0x42,0x97,0x00,0x00,0x02,0xb7,0x00,0x10,0x00,0x73}; 
+uint8_t instr[128] = {0x13,0x0e,0x80,0x00,0x93,0x0e,0xce,0xff,0x13,0x8f,0x0e,0x04,0xb7,0x02,0x00,0x00,0x97,0x42,0x00,0x00,0x73,0x00,0x10,0x00};
+/*****************************************io*************************************/
+#define DEVICE_BASE 0xa0000000
+#define SERIAL_PORT     (DEVICE_BASE + 0x00003f8)
+#define RTC_ADDR        (DEVICE_BASE + 0x0000048)
+//////////////////////////////////pmem//////////////////////////////////////////// 
+#define pmem_size 0x10000000
+static uint8_t pmem[pmem_size] PG_ALIGN = {};
+uint8_t* guest_to_host(long long paddr) { return pmem + paddr - 0x80000000;}
+uint8_t* guest_to_host_instr(long long paddr) { return instr + paddr - 0x80000000;}
 
-unsigned int pmem_read (unsigned long int n){
-	unsigned int a;
-	if(img_size == 128){
-	a = instr[n];
-	a = ((a << 8 | instr[n+1]) << 8 | instr[n+2] ) << 8 | instr[n+3];
-	}
-	else{
-	a = instr[n+3];
-	a = ((a << 8 | instr[n+2]) << 8 | instr[n+1] ) << 8 | instr[n];
-	}
-	
-	return a;
+static inline uint64_t host_read(void *addr, int len) {
+  switch (len) { 	
+    case 1: return *(uint8_t  *)addr;
+    case 2: return *(uint16_t *)addr;
+    case 4: return *(uint32_t *)addr;
+    case 8: return *(uint64_t *)addr;
+    default: assert(0);
+  }
 }
 
-////////////////////////////////////////////////////load outside instrcution part//////////////////////////////////////////////////
+static inline void host_write(void *addr, int len, uint64_t data) {
+  switch (len) {
+    case 1: *(uint8_t  *)addr = data; return;
+    case 2: *(uint16_t *)addr = data; return;
+    case 4: *(uint32_t *)addr = data; return;
+    case 8: *(uint64_t *)addr = data; return;
+    default: assert(0);
+  }
+}
+
+extern "C" void pmem_read (long long raddr,long long *rdata){
+	long long a;
+	if(img_size == 0){
+	a = host_read(guest_to_host_instr(raddr),8);
+	//printf("1\n");
+	}
+	else{
+	a = host_read(guest_to_host(raddr),8);
+	}
+	*rdata = (long long)a;
+}
+
+extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
+	long long rdata;
+	rdata = host_read(guest_to_host(waddr),8);
+	long long mask = 0 ;
+	long long temp = 0x00000000000000ff;
+	for(int i = 0 ; i < 8 ; i++ ){
+		if(wmask & (0x01 << i)){
+			//printf("in %d\n",i);
+			mask |= (temp << (i * 8));
+		}
+	}
+	long long temp_data = (wdata & mask) | rdata;
+	
+	host_write(guest_to_host(waddr), 8, temp_data);
+}
+
+/***********************************test****************************************/
+uint64_t temp_mtime = 0;
+extern "C" void pmem_read_test(long long raddr,long long *rdata,char len){
+	long long a;
+	if(raddr == RTC_ADDR + 4){
+	temp_mtime = get_time();
+	*rdata = (temp_mtime >> 32);
+	return;
+	}
+	if(raddr == RTC_ADDR){
+	*rdata = (temp_mtime & 0x00000000ffffffff);
+	return;
+	}
+	
+	if(img_size == 0){
+	a = host_read(guest_to_host_instr(raddr),(int)len);
+	//printf("1\n");
+	}
+	else{
+	a = host_read(guest_to_host(raddr),(int)len);
+	}
+	*rdata = (long long)a;
+}
+extern "C" void pmem_write_test(long long waddr, long long wdata, char len) {
+	if(waddr == SERIAL_PORT)
+	putchar((char)wdata);
+	else{	
+	//printf("%llx\n",waddr);
+	host_write(guest_to_host(waddr), (int)len, wdata);
+	}
+}
+////////////////////////////////load outside instrcution part////////////////////////////////////
 static long load_img() {
   if (img_file == NULL) {
     printf("No image is given. Use the default build-in image.\n");
-    return 128; // built-in image size
+    return 0; // built-in image size
   }
 
   FILE *fp = fopen(img_file, "rb");
@@ -225,7 +293,7 @@ static long load_img() {
   printf("The image is %s, size = %ld\n", img_file, size);
 
   fseek(fp, 0, SEEK_SET);
-  int ret = fread(instr, size, 1, fp);
+  int ret = fread(pmem, size, 1, fp);
   assert(ret == 1);
 
   fclose(fp);
@@ -251,23 +319,27 @@ static int parse_args(int argc, char *argv[]) {
 ////////////////////////////////////////////////////////sim Part///////////////////////////////////////////////////
 
 static void single_cycle() {
-  top->clk = 0; top->eval();
-
-  top->clk = 1; top->eval();
+  top->clk = 0; 
+  top->eval();
+  top->clk = 1; 
+  top->eval();
 }
 
 static void reset(int n) {
   top->rst = 0;
-  while (n -- > 0) 
+  while (n -- > 0){ 
   single_cycle();
+  }
   top->rst = 1;
 }
-unsigned long int temp = 0;
-unsigned long int pc = 0;
-unsigned char startover_flag = 0 ;
-void simmain(unsigned long int exectime){
 
-     if (startover_flag == 1){
+unsigned long int temp = 0;
+//uint64_t *tempinst;
+unsigned char startover_flag = 0 ;
+
+void simmain(unsigned long int exectime){
+	//tempinst = (uint64_t*)malloc(sizeof(uint64_t));
+    if (startover_flag == 1){
     printf("This program is finished please lanch again to run other programs\n");
     return;
     }
@@ -277,11 +349,13 @@ void simmain(unsigned long int exectime){
     }
     
     //Verilated::commandArgs(argc, argv); 
-    Verilated::traceEverOn(true); //导出vcd波形需要加此语句
-    VerilatedVcdC* tfp = new VerilatedVcdC; //导出vcd波形需要加此语句
     //Vnpc *top = new Vnpc("top"); //调用VAccumulator.h里面的IO struct
+    #ifdef VCD_WAVE
+    Verilated::traceEverOn(true); 
+    VerilatedVcdC* tfp = new VerilatedVcdC;
     top->trace(tfp, 0);   
-    tfp->open("wave.vcd"); //open vcd!Verilated::gotFinish() &&
+    tfp->open("wave.vcd");
+    #endif
     if(exectime != -1)
     temp+= exectime;
     else
@@ -289,10 +363,10 @@ void simmain(unsigned long int exectime){
  
     while (sc_time_stamp() < temp && (ebreak_flag == 0) && (NPC_STOP == 0)) 
     {
-    		pc = top->pc - 0x0000000080000000;
-                top->inst = pmem_read(pc);
+    		//pmem_read(top->pc_now,tempinst);
+                //top->inst = *(uint32_t *)tempinst;  
                 if (exectime != -1)
-        	printf("pc is 0x%016lx instrcution is 0x%08x\n",top->pc,top->inst);            
+        	printf("pc is 0x%016lx instrcution is 0x%08x\n",top->pc_now,top->inst);            
   		
         	if (!watchpoints_expr()) {
                 NPC_STOP = 1;
@@ -300,20 +374,24 @@ void simmain(unsigned long int exectime){
                 }  
                 
                 top->eval();
+                #ifdef VCD_WAVE
 		tfp->dump(main_time); //dump wave
+		#endif
         	main_time++;
         	single_cycle();  	
     }
     
     if((ebreak_flag==1) && (startover_flag == 0)){
     top->final();
+    #ifdef VCD_WAVE
     tfp->close();
+    #endif
     delete top;
     startover_flag = 1 ;
     } 
     
 } 
-///////////////////////////////////////////////////////////////main//////////////////////////////////////////////////////////////// 
+/*****************************************main******************************************/ 
 
 void init_sdb() {
   /* Compile the regular expressions. */
@@ -328,9 +406,9 @@ int main(int argc, char **argv)
     init_sdb();
     parse_args(argc, argv);
     img_size = load_img();//pass arg
-    assert(img_size < 4096);
+    assert(img_size < pmem_size);
     
-    reset(10);
+    reset(5);
     
     for (char *str; (str = rl_gets()) != NULL; ) {
     		char *str_end = str + strlen(str);

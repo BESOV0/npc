@@ -14,7 +14,7 @@ Vnpc::Vnpc(VerilatedContext* _vcontextp__, const char* _vcname__)
     , clk{vlSymsp->TOP.clk}
     , rst{vlSymsp->TOP.rst}
     , inst{vlSymsp->TOP.inst}
-    , pc{vlSymsp->TOP.pc}
+    , pc_now{vlSymsp->TOP.pc_now}
     , fdata{vlSymsp->TOP.fdata}
     , rootp{&(vlSymsp->TOP)}
 {

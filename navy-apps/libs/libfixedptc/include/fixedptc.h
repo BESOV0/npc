@@ -1,6 +1,6 @@
 #ifndef _FIXEDPTC_H_
 #define _FIXEDPTC_H_
-
+//#include <stdio.h>
 /*
  * fixedptc.h is a 32-bit or 64-bit fixed point numeric library.
  *
@@ -104,6 +104,7 @@ typedef	__uint128_t fixedptud;
 
 #define FIXEDPT_FBITS	(FIXEDPT_BITS - FIXEDPT_WBITS)
 #define FIXEDPT_FMASK	(((fixedpt)1 << FIXEDPT_FBITS) - 1)
+#define FIXEDPT_WMASK	(((fixedpt)1 << FIXEDPT_WBITS) - 1) << FIXEDPT_FBITS
 
 #define fixedpt_rconst(R) ((fixedpt)((R) * FIXEDPT_ONE + ((R) >= 0 ? 0.5 : -0.5)))
 #define fixedpt_fromint(I) ((fixedptd)(I) << FIXEDPT_FBITS)
@@ -125,37 +126,60 @@ typedef	__uint128_t fixedptud;
  * Putting them only in macros will effectively make them optional. */
 #define fixedpt_tofloat(T) ((float) ((T)*((float)(1)/(float)(1L << FIXEDPT_FBITS))))
 
-/* Multiplies a fixedpt number with an integer, returns the result. */
-static inline fixedpt fixedpt_muli(fixedpt A, int B) {
-	return 0;
-}
-
-/* Divides a fixedpt number with an integer, returns the result. */
-static inline fixedpt fixedpt_divi(fixedpt A, int B) {
-	return 0;
-}
 
 /* Multiplies two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_mul(fixedpt A, fixedpt B) {
-	return 0;
+	return ((fixedptd)A * (fixedptd)B) >> 8;//mul need double space such as 32*32 need 64bits
 }
 
 
 /* Divides two fixedpt numbers, returns the result. */
 static inline fixedpt fixedpt_div(fixedpt A, fixedpt B) {
-	return 0;
+	return (A / B) << 8;
 }
 
 static inline fixedpt fixedpt_abs(fixedpt A) {
-	return 0;
+	return ((A < 0) ? -A : A);
+}
+
+/* Multiplies a fixedpt number with an integer, returns the result. */
+static inline fixedpt fixedpt_muli(fixedpt A, int B) {
+	return fixedpt_mul(A, fixedpt_fromint(B));
+}
+
+/* Divides a fixedpt number with an integer, returns the result. */
+static inline fixedpt fixedpt_divi(fixedpt A, int B) {
+	return fixedpt_div(A, fixedpt_fromint(B));
 }
 
 static inline fixedpt fixedpt_floor(fixedpt A) {
-	return 0;
+	if((A == 0) || (A == 0x80000000) || (fixedpt_fracpart(A) == 0)){
+		return A;
+	}
+	else if(A > 0){
+		return (A & FIXEDPT_WMASK);
+	}
+	
+	else if(A < 0){
+		return (A & FIXEDPT_WMASK) - FIXEDPT_ONE ;
+	}
+	//printf("should not reach here in fixedpt_floor");
+	return -1;
 }
 
 static inline fixedpt fixedpt_ceil(fixedpt A) {
-	return 0;
+	if((A == 0) || (A == 0x80000000) || (fixedpt_fracpart(A) == 0)){
+		return A;
+	}
+	else if(A > 0){
+		return (A & FIXEDPT_WMASK) + FIXEDPT_ONE;
+	}
+	
+	else if(A < 0){
+		return (A & FIXEDPT_WMASK);
+	}
+	//printf("should not reach here in fixedpt_ceil");
+	return -1;
 }
 
 /*

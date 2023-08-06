@@ -73,10 +73,10 @@ static vaddr_t rcsr(word_t imm) {
 static void wcsr(word_t imm,word_t data) {
   switch (imm)
   {
-  case 0x342: {cpu.mcause = data; return;}
-  case 0x341: {cpu.mepc = data; return;}
-  case 0x300: {cpu.mstatus = data; return;}
-  case 0x305: {cpu.mtvec = data; return;}
+  case 0x342: {cpu.mcause = data; break;}
+  case 0x341: {cpu.mepc = data; break;}
+  case 0x300: {cpu.mstatus = data; break;}
+  case 0x305: {cpu.mtvec = data; break;}
   default: panic("wrong wcsr imm");
   }
 }
@@ -84,28 +84,41 @@ static void wcsr(word_t imm,word_t data) {
 static void wocsr(word_t imm,word_t data) {
   switch (imm)
   {
-  case 0x342: {cpu.mcause |= data;return;}
-  case 0x341: {cpu.mepc |= data;return;}
-  case 0x300: {cpu.mstatus |= data;return;}
-  case 0x305: {cpu.mtvec |= data;return;}
+  case 0x342: {cpu.mcause |= data;break;}
+  case 0x341: {cpu.mepc |= data;break;}
+  case 0x300: {cpu.mstatus |= data;break;}
+  case 0x305: {cpu.mtvec |= data;break;}
+  default: panic("wrong wocsr imm");
+  }
+}
+
+static void wacsr(word_t imm,word_t data) {
+  switch (imm)
+  {
+  case 0x342: {cpu.mcause &= ~data;break;}
+  case 0x341: {cpu.mepc &= ~data;break;}
+  case 0x300: {cpu.mstatus &= ~data;break;}
+  case 0x305: {cpu.mtvec &= ~data;break;}
   default: panic("wrong wocsr imm");
   }
 }
 
 static vaddr_t ecall(vaddr_t pc) { 
-	 bool success; 
-	 word_t temp = 0; 
-	 temp = isa_reg_str2val("a7", &success); 
-	if(success) 
-		return isa_raise_intr(temp,pc); 
-	else
-		panic("wrong reg str"); 
+	 //bool success; 
+	 //word_t temp = isa_reg_str2val("a7", &success); 
+	//if(success) 
+		return isa_raise_intr(0x0b,pc); 
+	//else
+		//panic("wrong reg str"); 
 }
 
 static vaddr_t mret() {
- 	
-  	cpu.mstatus = ((cpu.mstatus & 0x0000000000000080) >> 8) ? (cpu.mstatus | 0x0000000000000008) : (cpu.mstatus & 0xfffffffffffffff7);
+ 	/*
+  	cpu.mstatus = (((cpu.mstatus & 0x0000000000000080) >> 7) == 1) ? (cpu.mstatus | 0x0000000000000008) : (cpu.mstatus & 0xfffffffffffffff7);
   	cpu.mstatus |= 0x0000000000000080;
+  	return (cpu.mepc);
+  	*/
+  	 //cpu.mstatus=(cpu.mstatus&~(word_t)((1<<3)|(1<<7)|(3<<11)))|((word_t)(1<<7))|((cpu.mstatus>>7&1)<<3);
   	return cpu.mepc;
 }
 
@@ -114,13 +127,14 @@ static int decode_exec(Decode *s) {
   int dest = 0;
   word_t src1 = 0, src2 = 0, imm = 0;
   s->dnpc = s->snpc;
-
+  uint32_t temp = s->isa.inst.val;
+  long long int zimm = SEXT(BITS(temp, 19, 15),5);
 #define INSTPAT_INST(s) ((s)->isa.inst.val)
 #define INSTPAT_MATCH(s, name, type, ... /* execute body */ ) { \
   decode_operand(s, &dest, &src1, &src2, &imm, concat(TYPE_, type)); \
   __VA_ARGS__ ; \
 }
-
+	
   INSTPAT_START();
   INSTPAT("??????? ????? ????? ??? ????? 00101 11", auipc  , U, R(dest) = s->pc + (int64_t)imm);
   INSTPAT("??????? ????? ????? 011 ????? 00000 11", ld     , I, R(dest) = Mr(src1 + (int64_t)imm, 8));
@@ -151,12 +165,14 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 ????? ????? 001 ????? 01110 11", sllw   , R, R(dest) = SEXTS((BITS(src1 << BITS(src2,4,0),31,0)),32));
   INSTPAT("0000000 ????? ????? 011 ????? 01100 11", sltu   , R, R(dest) = (src1 < src2 ? 1 :0));
   INSTPAT("0000000 ????? ????? 110 ????? 01100 11", or     , R, R(dest) = src1 | src2);
+  
   //bubble add
   INSTPAT("000000? ????? ????? 101 ????? 00100 11", srli   , I, R(dest) = src1 >> BITS(imm,5,0));
   INSTPAT("??????? ????? ????? 101 ????? 11000 11", bge    , B, s->dnpc = (((src1 == src2) || ((int64_t)src1 > (int64_t)src2)) ? (int64_t)s->pc + (int64_t)imm : s->snpc));
   //div add
   INSTPAT("0000001 ????? ????? 000 ????? 01110 11", mulw   , R, R(dest) = SEXTS(BITS(((int64_t)src1 * (int64_t)src2),31,0),32));
   INSTPAT("0000001 ????? ????? 100 ????? 01110 11", divw   , R, R(dest) = SEXTS(BITS((int64_t)src1,31,0)/BITS((int64_t)src2,31,0),32));
+  INSTPAT("0000001 ????? ????? 100 ????? 01100 11", div    , R, R(dest) = (int64_t)src1 /(int64_t)src2);
   //goldbach add
   INSTPAT("0000001 ????? ????? 110 ????? 01110 11", remw   , R, R(dest) = SEXTS(BITS((int64_t)src1,31,0) % BITS((int64_t)src2,31,0),32));
   //if else add
@@ -172,9 +188,10 @@ static int decode_exec(Decode *s) {
   //mul-longlong add
   INSTPAT("0000001 ????? ????? 000 ????? 01100 11", mul    , R, R(dest) = (int64_t)src1 * (int64_t)src2);
   //shift add
-  INSTPAT("0000000 ????? ????? 101 ????? 00110 11",srliw , I, R(dest) = SEXTS((BITS(src1,31,0) >> BITS(imm,4,0)),32));
+  INSTPAT("000000? ????? ????? 101 ????? 00110 11",srliw , I, if(BITS(imm,5,5) == 0) R(dest) = SEXTS((BITS(src1,31,0) >> BITS(imm,4,0)),32));
   INSTPAT("0100000 ????? ????? 101 ????? 01110 11",sraw  , R, R(dest) = (int64_t)SEXTS(BITS(src1,31,0),32) >> BITS(src2,4,0));
   INSTPAT("0000000 ????? ????? 101 ????? 01110 11",srlw  , R, R(dest) = SEXTS((BITS(src1,31,0) >> BITS(src2,4,0)),32));
+  INSTPAT("0000000 ????? ????? 101 ????? 01100 11",srl   , R, R(dest) = src1 >> BITS(src2,5,0));
   //switch add
   INSTPAT("??????? ????? ????? 110 ????? 11000 11", bltu , B, s->dnpc = (src1 < src2 ? s->pc + (int64_t)imm : s->snpc));
   //hello-str add
@@ -199,7 +216,12 @@ static int decode_exec(Decode *s) {
   //csr
   INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , I, R(dest) = rcsr(imm); wcsr(imm,src1));
   INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , I, R(dest) = rcsr(imm); wocsr(imm,src1));
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , I, s->dnpc = ecall(s->pc));
+  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , I, R(dest) = rcsr(imm); wacsr(imm,src1));
+  INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , I, R(dest) = rcsr(imm); wacsr(imm,zimm));
+  INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , I, R(dest) = rcsr(imm); wcsr(imm,zimm));
+  INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , I, R(dest) = rcsr(imm); wocsr(imm,zimm));
+  
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = ecall(s->pc));
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , R, s->dnpc = mret());
     
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0

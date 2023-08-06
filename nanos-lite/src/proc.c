@@ -20,10 +20,11 @@ void hello_fun(void *arg) {
 }
 
 void init_proc() {
+  const char *filename = "/bin/nterm";//"/bin/bmp-test";"/bin/event-test";"/bin/nslider";nterm
   switch_boot_pcb();
-
+  
   Log("Initializing processes...");
-  naive_uload(NULL, NULL);
+  naive_uload(NULL, filename);
   // load program here
 
 }

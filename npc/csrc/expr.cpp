@@ -333,11 +333,14 @@ void deref_expr(){
     for (int i =0;i < nr_token;i++){
 	if (tokens[i].type == '*' && (i == 0 || (tokens[i - 1].type != TK_NUM && tokens[i - 1].type != TK_HEX && tokens[i - 1].type != TK_REG && tokens[i - 1].type !=')'))) {
 	  char *str;
+	  long long *data;
+	  data =(long long*)malloc(sizeof(long long));
 	  //unsigned int mem;
 	  word_t addr;
           tokens[i].type = DEREF;          
           addr = strtol(tokens[i+1].str,&str,16);
-          sprintf(tokens[i].str,"%x",pmem_read(addr - 0x80000000)); 
+          pmem_read(addr,data);
+          sprintf(tokens[i].str,"%x",*(unsigned int *)data); 
          // printf("0x%02x\n" , mem & 0xff);
          //break;  
        }

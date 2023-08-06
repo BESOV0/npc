@@ -1,4 +1,5 @@
 #include <NDL.h>
+#include <assert.h>
 
 int SDL_Init(uint32_t flags) {
   return NDL_Init(flags);
@@ -21,4 +22,6 @@ int SDL_ShowCursor(int toggle) {
 }
 
 void SDL_WM_SetCaption(const char *title, const char *icon) {
+	
+	//assert(0);
 }

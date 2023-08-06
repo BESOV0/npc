@@ -17,16 +17,15 @@
 #include <cpu/cpu.h>
 #include <difftest-def.h>
 #include <memory/paddr.h>
-
+/*
 struct diff_context_t {
   word_t gpr[32];
   word_t pc;
-  word_t mcause;
-  vaddr_t mepc;
-  word_t mstatus;
-  word_t mtvec;
-};
-
+  //word_t mcause;
+  //vaddr_t mepc;
+  //word_t mstatus;
+  //word_t mtvec;
+};*/
 void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
   if(direction == DIFFTEST_TO_REF){ 
      for (size_t i = 0; i < n; i++) {
@@ -37,28 +36,26 @@ void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
    assert(0); 
 }
 
-void diff_set_regs(void* diff_context) {
-  struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
+void diff_set_regs(CPU_state* ctx) {
   for (int i = 0; i < 32; i++) {
     cpu.gpr[i] = ctx->gpr[i];
     }
     cpu.pc = ctx->pc;
-    cpu.mcause = ctx->mcause ;
-    cpu.mepc = ctx->mepc;
-    cpu.mstatus = ctx->mstatus;
-    cpu.mtvec = ctx->mtvec ;
+    //cpu.mcause = ctx->mcause ;
+    //cpu.mepc = ctx->mepc;
+    //cpu.mstatus = ctx->mstatus;
+    //cpu.mtvec = ctx->mtvec ;
 }
 
-void diff_get_regs(void* diff_context) {
-  struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
+void diff_get_regs(CPU_state* ctx) {
   for (int i = 0; i < 32; i++) {
     ctx->gpr[i] = cpu.gpr[i] ;
   }
     ctx->pc = cpu.pc;
-    ctx->mcause = cpu.mcause;
-    ctx->mepc = cpu.mepc;
-    ctx->mstatus = cpu.mstatus;
-    ctx->mtvec = cpu.mtvec;
+    //ctx->mcause = cpu.mcause;
+    //ctx->mepc = cpu.mepc;
+    //ctx->mstatus = cpu.mstatus;
+    //ctx->mtvec = cpu.mtvec;
 }
 
 
@@ -76,6 +73,7 @@ void difftest_exec(uint64_t n) {
 }
 
 void difftest_raise_intr(word_t NO) {
+	cpu.pc=isa_raise_intr(NO,cpu.pc);
   //assert(0);
 }
 

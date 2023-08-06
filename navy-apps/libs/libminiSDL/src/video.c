@@ -3,16 +3,151 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
+
+//The width and height in srcrect determine the size of the copied rectangle. Only the position is used in the dstrect (the width and height are ignored).
 void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
-  assert(dst && src);
-  assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+  	assert(dst && src);
+  	assert(dst->format->BitsPerPixel == src->format->BitsPerPixel);
+	int src_x,src_y,src_w,src_h,dst_x,dst_y; 
+	int temp_src_x,temp_src_y;
+	
+	if(srcrect == NULL){
+		src_x = 0;
+		src_y = 0;
+		src_w = src->w;
+		src_h = src->h;
+	}
+	else{
+		src_x = srcrect->x;
+		src_y = srcrect->y;
+		src_w = srcrect->w;
+		src_h = srcrect->h;
+	}
+	if(dstrect == NULL){
+		dst_x = 0;
+		dst_y = 0;
+	}
+	else{
+		dst_x = dstrect->x;
+		dst_y = dstrect->y;
+	}
+	if(src->format->BitsPerPixel == 32){
+		uint32_t *src_pixels_32 = (uint32_t *)src->pixels;
+		uint32_t *dst_pixels_32 = (uint32_t *)dst->pixels;
+		temp_src_y = src_y;
+		for(int i = dst_y; i < dst_y + src_h; i++){
+			temp_src_x = src_x;
+			for(int j = dst_x; j < dst_x + src_w ; j++){
+				dst_pixels_32[ i * dst->w + j] = src_pixels_32[temp_src_y * src->w + temp_src_x];
+				temp_src_x += 1;
+			}
+			temp_src_y += 1;
+		}
+	}
+	else if(src->format->BitsPerPixel == 8){
+		uint8_t *src_pixels_8 = (uint8_t *)src->pixels;
+		uint8_t *dst_pixels_8 = (uint8_t *)dst->pixels;
+		temp_src_y = src_y;
+		for(int i = dst_y; i < dst_y + src_h; i++){
+			temp_src_x = src_x;
+			for(int j = dst_x; j < dst_x + src_w ; j++){
+				dst_pixels_8[ i * dst->w + j] = src_pixels_8[temp_src_y * src->w + temp_src_x];
+				temp_src_x += 1;
+			}
+			temp_src_y += 1;
+		}
+	}
+	else{
+		printf("SDL_BlitSurface BitsPerPixel is %d\n",dst->format->BitsPerPixel);
+		//return;
+	}	
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
+	int x,y,w,h;
+	
+	if(dstrect == NULL){
+		x = 0;
+		y = 0;
+		w = dst->w;
+		h = dst->h;
+	}
+	else{
+		x = dstrect->x;
+		y = dstrect->y;
+		w = dstrect->w;
+		h = dstrect->h;
+	}
+	if(dst->format->BitsPerPixel == 32){
+		uint32_t *pixels = (uint32_t *)dst->pixels;
+		for(int i = y; i < y + h;i++){
+			for(int j = x; j < x + w ; j++){
+				pixels[i * dst->w + j] = color;
+			}
+		}
+	}
+	else if(dst->format->BitsPerPixel == 8){
+		uint8_t k = 0;
+		for(k = 0; k < dst->format->palette->ncolors; k++){
+			if((dst->format->palette->colors[k].b == color & 0xff) &&  
+			   (dst->format->palette->colors[k].g == (color >> 8) & 0xff) &&
+			   (dst->format->palette->colors[k].r == (color >> 16) & 0xff) &&
+			   (dst->format->palette->colors[k].a == (color >> 24) & 0xff))  
+				break;
+		}
+		uint8_t *pixels = (uint8_t *)dst->pixels;
+		for(int i = y; i < y + h;i++){
+			for(int j = x; j < x + w ; j++){
+				pixels[i * dst->w + j] = k;
+			}
+		}
+	}
+	else{
+		printf("SDL_FillRect BitsPerPixel is %d\n",dst->format->BitsPerPixel);
+		//return;	
+	}	
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
+	
+	int temp_x,temp_y,temp_w,temp_h;
+	if((x == 0) && (y == 0) && (w == 0) && (h == 0)){
+		temp_x = 0;
+		temp_y = 0;
+		temp_w = s->w;
+		temp_h = s->h;
+	}
+	else{
+		temp_x = x;
+		temp_y = y;
+		temp_w = w;
+		temp_h = h;
+	}
+	
+	if (s->format->BitsPerPixel == 32){
+    		NDL_DrawRect((uint32_t*)s->pixels,temp_x,temp_y,temp_w,temp_h);
+    		return;
+  	}
+  	else if(s->format->BitsPerPixel == 8){
+  		uint32_t Bit8_Pixel[400*300];
+  		uint8_t* idx = s->pixels;
+    		for(int i = temp_y; i < temp_h + temp_y; i++){
+      			for(int j = temp_x; j < temp_w + temp_x; j++){
+        		uint8_t temp_idx = idx[i * s->w +j];
+        		Bit8_Pixel[i * s->w + j] = (uint32_t)s->format->palette->colors[temp_idx].a<<24 | (uint32_t)s->format->palette->colors[temp_idx].r<<16 | (uint32_t)s->format->palette->colors[temp_idx].g<<8 | (uint32_t)s->format->palette->colors[temp_idx].b;	
+      			}
+    		}
+  		NDL_DrawRect(Bit8_Pixel,temp_x,temp_y,temp_w,temp_h);
+    		return;
+  	}
+  	else{
+  		printf("pixel is %d\n",s->format->BitsPerPixel);
+  		assert(0);
+  	}
+  		
+  		
 }
 
 // APIs below are already implemented.
@@ -193,8 +328,11 @@ uint32_t SDL_MapRGBA(SDL_PixelFormat *fmt, uint8_t r, uint8_t g, uint8_t b, uint
 }
 
 int SDL_LockSurface(SDL_Surface *s) {
+	
+	assert(0);
   return 0;
 }
 
 void SDL_UnlockSurface(SDL_Surface *s) {
+	assert(0);
 }
