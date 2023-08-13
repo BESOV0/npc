@@ -1,4 +1,4 @@
-`include "defines.v"
+`include "ysyx_22050598_defines.v"
 module ysyx_22050598_idu_decode (
     input [31:0]  id_inst_i             ,
     //ALU Part
@@ -37,51 +37,52 @@ module ysyx_22050598_idu_decode (
 );
     //Decode funct3 Part
     wire [2:0] func3  = id_inst_i[14:12];
-    wire func3_000     = (func3 == 3'b000);
-    wire func3_001     = (func3 == 3'b001);
-    wire func3_010     = (func3 == 3'b010);
-    wire func3_011     = (func3 == 3'b011);
-    wire func3_100     = (func3 == 3'b100);
-    wire func3_101     = (func3 == 3'b101);
-    wire func3_110     = (func3 == 3'b110);
-    wire func3_111     = (func3 == 3'b111);
+    wire func3_000     = ~func3[2] & ~func3[1] & ~func3[0] ;
+    wire func3_001     = ~func3[2] & ~func3[1] &  func3[0] ;
+    wire func3_010     = ~func3[2] &  func3[1] & ~func3[0] ;
+    wire func3_011     = ~func3[2] &  func3[1] &  func3[0] ;
+    wire func3_100     =  func3[2] & ~func3[1] & ~func3[0] ;
+    wire func3_101     =  func3[2] & ~func3[1] &  func3[0] ;
+    wire func3_110     =  func3[2] &  func3[1] & ~func3[0] ;
+    wire func3_111     =  func3[2] &  func3[1] &  func3[0] ;
     //Decode funct7 Part
     wire [6:0] func7  = id_inst_i[31:25];
-    wire func7_0000000 = (func7 == 7'b0000000);
-    wire func7_0100000 = (func7 == 7'b0100000);
-    wire func7_0000001 = (func7 == 7'b0000001);
-    wire func7_0000100 = (func7 == 7'b0000100); 
-    wire func7_0001000 = (func7 == 7'b0001000); 
-    wire func7_0010000 = (func7 == 7'b0010000); 
-    wire func7_0011000 = (func7 == 7'b0011000);
+    wire func7_0000000 = ~(|func7[5:0]) ;
+    wire func7_0100000 =  func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0000001 = ~func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] &  func7[0] ;
+    wire func7_0000100 = ~func7[5] & ~func7[4] & ~func7[3] &  func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0001000 = ~func7[5] & ~func7[4] &  func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0010000 = ~func7[5] &  func7[4] & ~func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0011000 = ~func7[5] &  func7[4] &  func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;   
+    wire func6_010000  =  func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] ;
+    wire func6_000000  = ~(|func7[5:1]);
     //Decode Reg Part
     wire [4:0] rs1_idx = id_inst_i[19:15];
     wire [4:0] rs2_idx = id_inst_i[24:20];
     wire [4:0] rd_idx  = id_inst_i[11:7];
-    wire rs1_00000     = (rs1_idx == 5'b00000);
-    wire rs2_00000     = (rs2_idx == 5'b00000);
-    wire rs2_00001     = (rs2_idx == 5'b00001);
-    wire rs2_00010     = (rs2_idx == 5'b00010);
-    wire rd_00000      = (rd_idx  == 5'b00000);
+
+    wire rs1_00000     = ~(|rs1_idx);
+    wire rs2_00000     = ~(|rs2_idx);
+    wire rs2_00001     = ~rs2_idx[4] & ~rs2_idx[3] & ~rs2_idx[2] & ~rs2_idx[1] &  rs2_idx[0] ;
+    wire rs2_00010     = ~rs2_idx[4] & ~rs2_idx[3] & ~rs2_idx[2] &  rs2_idx[1] & ~rs2_idx[0] ;
+    wire rd_00000      = ~(|rd_idx);
     
     //Decode instruction type
     wire [6:0] opcode  = id_inst_i[6:0];
-    wire opcode_alui   = (opcode == `ysyx_22050598_OPCODE_ALUI);
-    wire opcode_alur   = (opcode == `ysyx_22050598_OPCODE_ALUR);
-    wire opcode_aluiw  = (opcode == `ysyx_22050598_OPCODE_ALUIW);
-    wire opcode_alurw  = (opcode == `ysyx_22050598_OPCODE_ALURW);
-    wire opcode_auipc  = (opcode == `ysyx_22050598_OPCODE_AUIPC);
-    wire opcode_branch = (opcode == `ysyx_22050598_OPCODE_BRANCH);
-    wire opcode_jal    = (opcode == `ysyx_22050598_OPCODE_JAL);
-    wire opcode_jalr   = (opcode == `ysyx_22050598_OPCODE_JALR);
-    wire opcode_load   = (opcode == `ysyx_22050598_OPCODE_LOAD);
-    wire opcode_store  = (opcode == `ysyx_22050598_OPCODE_STORE);
-    wire opcode_lui    = (opcode == `ysyx_22050598_OPCODE_LUI);
-    wire opcode_system = (opcode == `ysyx_22050598_OPCODE_SYSTEM);
+    wire opcode_alui   = ~(|(opcode ^ `ysyx_22050598_OPCODE_ALUI   ));
+    wire opcode_alur   = ~(|(opcode ^ `ysyx_22050598_OPCODE_ALUR   ));
+    wire opcode_aluiw  = ~(|(opcode ^ `ysyx_22050598_OPCODE_ALUIW  ));
+    wire opcode_alurw  = ~(|(opcode ^ `ysyx_22050598_OPCODE_ALURW  ));
+    wire opcode_auipc  = ~(|(opcode ^ `ysyx_22050598_OPCODE_AUIPC  ));
+    wire opcode_branch = ~(|(opcode ^ `ysyx_22050598_OPCODE_BRANCH ));
+    wire opcode_jal    = ~(|(opcode ^ `ysyx_22050598_OPCODE_JAL    ));
+    wire opcode_jalr   = ~(|(opcode ^ `ysyx_22050598_OPCODE_JALR   ));
+    wire opcode_load   = ~(|(opcode ^ `ysyx_22050598_OPCODE_LOAD   ));
+    wire opcode_store  = ~(|(opcode ^ `ysyx_22050598_OPCODE_STORE  ));
+    wire opcode_lui    = ~(|(opcode ^ `ysyx_22050598_OPCODE_LUI    ));
+    wire opcode_system = ~(|(opcode ^ `ysyx_22050598_OPCODE_SYSTEM ));
     //**************decode which instruction******************
     //Immediate operation instruction
-    wire func6_010000  = (id_inst_i[31:26] == 6'b010000);
-    wire func6_000000  = (id_inst_i[31:26] == 6'b000000);
     wire inst_addi     = (opcode_alui & func3_000);
     wire inst_slti     = (opcode_alui & func3_010);
     wire inst_sltiu    = (opcode_alui & func3_011);//unsigned
@@ -217,7 +218,7 @@ module ysyx_22050598_idu_decode (
     assign alu_operand_sel_a[1] = opcode_jal | opcode_auipc  ; // Jump instruction or instruction which uses pc without B-type
     assign alu_operand_sel_a[0] = opcode_lui ; // for instcruction with only one operand
 
-    assign alu_operand_sel_b[1] = inst_type[5] | inst_type[2]                               ;//R-type or B-type
+    assign alu_operand_sel_b[1] = inst_type[5] | inst_type[2] ;//R-type or B-type
     assign alu_operand_sel_b[0] = inst_type[4] | inst_type[3] | inst_type[1] | inst_type[0];
 
     wire [1:0] ls_type = //({2{(inst_lb | inst_lbu | inst_sb)}} & `Byte) //Default is 0 can be omitted
@@ -262,7 +263,7 @@ module ysyx_22050598_idu_decode (
     assign id_inst_is_rv64_o = rv64_inst;
 
     //illegal Instruction Flag
-    wire sxxiw_shamt_legl = (id_inst_i[25] == 1'b0); //shamt[5] must be zero for RV64I
+    wire sxxiw_shamt_legl = ~id_inst_i[25]; //shamt[5] must be zero for RV64I
     wire sxxiw_shamt_ilgl = (inst_slliw | inst_srliw | inst_sraiw) & (~sxxiw_shamt_legl);
     assign id_inst_is_illegal_o = sxxiw_shamt_ilgl;
  endmodule

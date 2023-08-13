@@ -1,0 +1,141 @@
+// Verilated -*- C++ -*-
+// DESCRIPTION: Verilator output: Design implementation internals
+// See Vnpc.h for the primary calling header
+
+#include "verilated.h"
+#include "verilated_dpi.h"
+
+#include "Vnpc_npc.h"
+
+VL_ATTR_COLD void Vnpc_npc___ctor_var_reset(Vnpc_npc* vlSelf) {
+    if (false && vlSelf) {}  // Prevent unused
+    Vnpc__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    VL_DEBUG_IF(VL_DBG_MSGF("+      Vnpc_npc___ctor_var_reset\n"); );
+    // Body
+    vlSelf->test_if_pc = VL_RAND_RESET_Q(64);
+    vlSelf->test_if_inst = VL_RAND_RESET_I(32);
+    vlSelf->test_id_pc = VL_RAND_RESET_Q(64);
+    vlSelf->test_id_inst = VL_RAND_RESET_I(32);
+    vlSelf->test_ex_pc = VL_RAND_RESET_Q(64);
+    vlSelf->test_ex_inst = VL_RAND_RESET_I(32);
+    vlSelf->test_ls_pc = VL_RAND_RESET_Q(64);
+    vlSelf->test_ls_inst = VL_RAND_RESET_I(32);
+    vlSelf->test_wb_pc = VL_RAND_RESET_Q(64);
+    vlSelf->test_wb_inst = VL_RAND_RESET_I(32);
+    vlSelf->clk = VL_RAND_RESET_I(1);
+    vlSelf->rst = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ebreak_a0 = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__if_bpu_pc_op = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__if_prdt_taken = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__if_id_inst = VL_RAND_RESET_I(32);
+    vlSelf->__PVT__if_id_pc = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__id_pc = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__id_inst = VL_RAND_RESET_I(32);
+    vlSelf->__PVT__id_ex_op_type = VL_RAND_RESET_I(10);
+    vlSelf->__PVT__id_op_a_sel = VL_RAND_RESET_I(3);
+    vlSelf->__PVT__id_op_b_sel = VL_RAND_RESET_I(2);
+    vlSelf->__PVT__id_imm = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__id_read_rs1_idx = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__id_read_rs2_idx = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__id_ex_w_reg_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_write_rd_idx = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__id_ex_inst_is_ebreak = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_ecall = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_jalr = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_jal = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_store = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_set = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_srax = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_5_shamt = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_mret = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_csri = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_ls_data_bus = VL_RAND_RESET_I(2);
+    vlSelf->__PVT__id_ex_inst_divrem_bus = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_mul_bus = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__id_ex_csr_bus = VL_RAND_RESET_I(6);
+    vlSelf->__PVT__id_ex_branch_bus = VL_RAND_RESET_I(6);
+    vlSelf->__PVT__id_ex_unsigned_bus = VL_RAND_RESET_I(2);
+    vlSelf->__PVT__id_ex_ls_req = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_ex_inst_is_rv64 = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_inst_is_illegal = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__id_read_rs1_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__id_read_rs2_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__id_ex_alu_op_a = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__id_ex_alu_op_b = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__id_ex_bs_zimm_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__forward_load_stall = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst = VL_RAND_RESET_I(32);
+    vlSelf->__PVT__ex_op_type = VL_RAND_RESET_I(10);
+    vlSelf->__PVT__ex_alu_op_a = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_alu_op_b = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_pc = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_bs_zimm_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_write_rd_idx = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__ex_w_reg_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_ebreak = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_ecall = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_jalr = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_jal = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_store = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_set = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_srax = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_5_shamt = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_mret = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_ls_data_bus = VL_RAND_RESET_I(2);
+    vlSelf->__PVT__ex_inst_divrem_bus = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_mul_bus = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__ex_csr_bus = VL_RAND_RESET_I(6);
+    vlSelf->__PVT__ex_branch_bus = VL_RAND_RESET_I(6);
+    vlSelf->__PVT__ex_unsigned_bus = VL_RAND_RESET_I(2);
+    vlSelf->__PVT__ex_ls_req = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_inst_is_rv64 = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_ls_alu_rd_ls_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_ls_alu_rd_data_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_ls_alu_pc = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_ls_alu_pc_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_ls_load_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_ls_store_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_ls_store_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__muldiv_ready = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__muldivout_valid = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_csr_rd_pc_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_rd_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ex_pc_data_ena = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ex_pc_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ls_inst = VL_RAND_RESET_I(32);
+    vlSelf->__PVT__ls_pc = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ls_alu_rd_ls_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ls_store_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ls_alu_rd_data_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ls_load_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ls_store_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ls_ls_data_type = VL_RAND_RESET_I(2);
+    vlSelf->__PVT__ls_rd_idx = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__ls_inst_is_ebreak = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__ls_load_unsigned = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__wb_inst = VL_RAND_RESET_I(32);
+    vlSelf->__PVT__wb_pc = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ls_wb_load_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__ls_rd_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__wb_rd_data = VL_RAND_RESET_Q(64);
+    vlSelf->__PVT__wb_rd_en = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__wb_rd_idx = VL_RAND_RESET_I(5);
+    vlSelf->__PVT__wb_inst_is_ebreak = VL_RAND_RESET_I(1);
+    vlSelf->__PVT__pipeline_flush = VL_RAND_RESET_I(3);
+    vlSelf->__PVT__pipeline_stall = VL_RAND_RESET_I(5);
+    vlSelf->__Vcellinp__u_ysyx_22050598_ifu__flush_pc_en = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_ifu__pc_stall = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_IF_ID__if_stall = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_IF_ID__if_flush = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_ID_EX__id_ex_stall = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_ID_EX__id_ex_flush = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_exu_alu__ex_unsigned_bus = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_exu_alu__ex_muldiv_flush = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_exu_rd_pc_mux__csr_rd_en = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_EX_LS__ex_ls_load_unsigned = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__u_ysyx_22050598_EX_LS__ex_ls_stall = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__ysyx_22050598_LS_WB__ls_wb_stall = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__ysyx_22050598_pipeline_ctrl__exu_is_rem = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__ysyx_22050598_pipeline_ctrl__exu_is_div = VL_RAND_RESET_I(1);
+    vlSelf->__Vcellinp__ysyx_22050598_pipeline_ctrl__exu_is_mul = VL_RAND_RESET_I(1);
+}

@@ -41,11 +41,9 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {//len is w
 	AM_GPU_CONFIG_T gpu_config = io_read(AM_GPU_CONFIG);
-	
 	//printf("fb_width is %d\n",gpu_config.width);
 	int x = (offset / 4) % gpu_config.width;//(x + i*screen_w) is offset which means this code is x
   	int y = (offset / 4) / gpu_config.width;//(x + i*screen_w) is offset which means this code is i which is y
-
   	io_write(AM_GPU_FBDRAW, x, y, (void*)buf, len / 4, 1, true);//order in amdev.h, Write one line at a time
   	return len;
 }

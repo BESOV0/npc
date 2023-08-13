@@ -1,11 +1,11 @@
 module ysyx_22050598_lsu (
-    input [63:0]    store_data,
-    input [63:0]    ls_loc,
-    input           load_en,
-    input           store_en,
-    input [1:0]     ls_type,
-    input           load_unsigned,
-    output [63:0]   load_data
+    input [63:0]    ls_store_data   ,
+    input [63:0]    ls_loc          ,
+    input           load_en         ,
+    input           store_en        ,
+    input [1:0]     ls_type         ,
+    input           load_unsigned   ,
+    output [63:0]   load_data_o
 );
     /*
     wire [63:0] raddr = {ls_loc[63:3],3'b0};
@@ -29,10 +29,10 @@ module ysyx_22050598_lsu (
     wire loc3_111 = (ls_loc[2:0] == 3'b111);
 
 
-    assign wdata = ({64{size_b}}  & {8{store_data[7:0]}})  |
-                   ({64{size_hw}} & {4{store_data[15:0]}}) |
-                   ({64{size_w}}  & {2{store_data[31:0]}}) |
-                   ({64{size_dw}} & store_data)            ;
+    assign wdata = ({64{size_b}}  & {8{ls_store_data[7:0]}})  |
+                   ({64{size_hw}} & {4{ls_store_data[15:0]}}) |
+                   ({64{size_w}}  & {2{ls_store_data[31:0]}}) |
+                   ({64{size_dw}} & ls_store_data)            ;
 
     wire [7:0] byte_wmask = ({8{loc3_000}} & 8'b00000001)  |
                             ({8{loc3_001}} & 8'b00000010)  |
@@ -131,10 +131,10 @@ module ysyx_22050598_lsu (
     wire size_w  = (ls_type == 2'b10) ;
     wire size_dw = (ls_type == 2'b11) ;
 
-    assign wdata = ({64{size_b}}  & {8{store_data[7:0]}})  |
-                   ({64{size_hw}} & {4{store_data[15:0]}}) |
-                   ({64{size_w}}  & {2{store_data[31:0]}}) |
-                   ({64{size_dw}} & store_data)            ;
+    assign wdata = ({64{size_b}}  & {8{ls_store_data[7:0]}})  |
+                   ({64{size_hw}} & {4{ls_store_data[15:0]}}) |
+                   ({64{size_w}}  & {2{ls_store_data[31:0]}}) |
+                   ({64{size_dw}} & ls_store_data)            ;
 
     assign rlen = ({8{size_b}}  & 8'd1) |
                   ({8{size_hw}} & 8'd2) |
@@ -149,6 +149,8 @@ module ysyx_22050598_lsu (
     always @(*) begin
         if(load_en == 1'b1)
         pmem_read_test(raddr, rdata, rlen);
+        else
+        pmem_read_test(64'h0000000080000000, rdata, rlen);
     end
 
     always @(*) begin
@@ -157,10 +159,10 @@ module ysyx_22050598_lsu (
     end
 
 
-    assign load_data =  ({64{size_b}}  & {{56{rdata[7]   & ~load_unsigned}},rdata[7:0]}) |
-                        ({64{size_hw}} & {{48{rdata[15]  & ~load_unsigned}},rdata[15:0]}) |
-                        ({64{size_w}}  & {{32{rdata[31]  & ~load_unsigned}},rdata[31:0]}) |
-                        ({64{size_dw}} & rdata ) ;
+    assign load_data_o = ({64{size_b}}  & {{56{rdata[7]   & ~load_unsigned}},rdata[7:0]})  |
+                         ({64{size_hw}} & {{48{rdata[15]  & ~load_unsigned}},rdata[15:0]}) |
+                         ({64{size_w}}  & {{32{rdata[31]  & ~load_unsigned}},rdata[31:0]}) |
+                         ({64{size_dw}} & rdata ) ;
 
 
 

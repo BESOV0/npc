@@ -66,7 +66,7 @@ void do_syscall(Context *c) {
   a[1] = c->GPR2;//a0
   a[2] = c->GPR3;//a1
   a[3] = c->GPR4;//a2
-   #ifdef STRACE
+  #ifdef STRACE
   if(a[0] != 19)
   Log("%s call, syscall ID is %d, return value is %d,filename is %s",strs[a[0]],a[0],c->GPRx,do_filename(a[0],a[1]));
   #endif

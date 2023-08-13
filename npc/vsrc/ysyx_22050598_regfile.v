@@ -1,4 +1,4 @@
-`include "defines.v"
+`include "ysyx_22050598_defines.v"
 module ysyx_22050598_regfile (
     input                                     clk             ,
     input                                     rst             ,

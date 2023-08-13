@@ -8,17 +8,14 @@
 #ifndef VERILATED_VNPC_H_
 #define VERILATED_VNPC_H_  // guard
 
-#include "verilated_heavy.h"
+#include "verilated.h"
 #include "svdpi.h"
 
 class Vnpc__Syms;
 class Vnpc___024root;
-class VerilatedVcdC;
-class Vnpc_VerilatedVcd;
-
 
 // This class is the main interface to the Verilated model
-class Vnpc VL_NOT_FINAL {
+class Vnpc VL_NOT_FINAL : public VerilatedModel {
   private:
     // Symbol table holding complete model state (owned by this class)
     Vnpc__Syms* const vlSymsp;
@@ -29,10 +26,18 @@ class Vnpc VL_NOT_FINAL {
     // The application code writes and reads these signals to
     // propagate new values into/out from the Verilated model.
     VL_IN8(&clk,0,0);
+    VL_OUT8(&npc_stall,0,0);
     VL_IN8(&rst,0,0);
-    VL_OUT(&inst,31,0);
-    VL_OUT64(&pc_now,63,0);
-    VL_OUT64(&fdata,63,0);
+    VL_OUT(&test_if_inst,31,0);
+    VL_OUT(&test_id_inst,31,0);
+    VL_OUT(&test_ex_inst,31,0);
+    VL_OUT(&test_ls_inst,31,0);
+    VL_OUT(&test_wb_inst,31,0);
+    VL_OUT64(&test_if_pc,63,0);
+    VL_OUT64(&test_id_pc,63,0);
+    VL_OUT64(&test_ex_pc,63,0);
+    VL_OUT64(&test_ls_pc,63,0);
+    VL_OUT64(&test_wb_pc,63,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.
@@ -65,13 +70,17 @@ class Vnpc VL_NOT_FINAL {
     void eval_end_step() {}
     /// Simulation complete, run final blocks.  Application must call on completion.
     void final();
-    /// Trace signals in the model; called by application code
-    void trace(VerilatedVcdC* tfp, int levels, int options = 0);
-    /// Return current simulation context for this model.
-    /// Used to get to e.g. simulation time via contextp()->time()
-    VerilatedContext* contextp() const;
+    /// Are there scheduled events to handle?
+    bool eventsPending();
+    /// Returns time at next time slot. Aborts if !eventsPending()
+    uint64_t nextTimeSlot();
     /// Retrieve name of this model instance (as passed to constructor).
     const char* name() const;
+
+    // Abstract methods from VerilatedModel
+    const char* hierName() const override final;
+    const char* modelName() const override final;
+    unsigned threads() const override final;
 } VL_ATTR_ALIGNED(VL_CACHE_LINE_BYTES);
 
 #endif  // guard

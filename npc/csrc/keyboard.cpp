@@ -1,7 +1,5 @@
-#include <SDL2/SDL.h>
-
+#include "npc.h"
 #define KEYDOWN_MASK 0x8000
-
 // Note that this is not the standard
 #define _KEYS(f) \
   f(ESCAPE) f(F1) f(F2) f(F3) f(F4) f(F5) f(F6) f(F7) f(F8) f(F9) f(F10) f(F11) f(F12) \
@@ -16,13 +14,13 @@ f(UP) f(DOWN) f(LEFT) f(RIGHT) f(INSERT) f(DELETE) f(HOME) f(END) f(PAGEUP) f(PA
 
 enum {
   _KEY_NONE = 0,
-  MAP(_KEYS, _KEY_NAME)
+  MAP(_KEYS, _KEY_NAME)//_KEY_ESCAPE......_KEY_PAGEDOWN
 };
 
-#define SDL_KEYMAP(k) keymap[concat(SDL_SCANCODE_, k)] = concat(_KEY_, k);
+#define SDL_KEYMAP(k) keymap[SDL_SCANCODE_##k] = _KEY_##k;
 static uint32_t keymap[256] = {};
 
-static void init_keymap() {
+void init_keymap() {
   MAP(_KEYS, SDL_KEYMAP)
 }
 
@@ -30,23 +28,24 @@ static void init_keymap() {
 static int key_queue[KEY_QUEUE_LEN] = {};
 static int key_f = 0, key_r = 0;
 
-static void key_enqueue(uint32_t am_scancode) {
+void key_enqueue(uint32_t am_scancode) {
   key_queue[key_r] = am_scancode;
+  //printf("%x\n",am_scancode);
   key_r = (key_r + 1) % KEY_QUEUE_LEN;
-  Assert(key_r != key_f, "key queue overflow!");
+  assert(key_r != key_f);
 }
 
-static uint32_t key_dequeue() {
+uint32_t key_dequeue() {
   uint32_t key = _KEY_NONE;
   if (key_f != key_r) {
     key = key_queue[key_f];
-    key_f = (key_f + 1) % KEY_QUEUE_LEN;
+    key_f = (key_f + 1) % KEY_QUEUE_LEN;    
   }
   return key;
 }
 
 void send_key(uint8_t scancode, bool is_keydown) {
-  if (nemu_state.state == NEMU_RUNNING && keymap[scancode] != _KEY_NONE) {
+  if (keymap[scancode] != _KEY_NONE) {
     uint32_t am_scancode = keymap[scancode] | (is_keydown ? KEYDOWN_MASK : 0);
     key_enqueue(am_scancode);
   }

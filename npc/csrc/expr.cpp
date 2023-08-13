@@ -1,5 +1,6 @@
 #include "npc.h"
 #include <regex.h>
+
 enum {
   TK_NOTYPE = 256, TK_EQ, TK_NUM,TK_LEFT_Para, TK_RIGHT_Para, TK_HEX, TK_REG, TK_OR, TK_AND, TK_NOTEQ, DEREF
 

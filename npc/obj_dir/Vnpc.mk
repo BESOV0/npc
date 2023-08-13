@@ -18,7 +18,7 @@ SYSTEMC_LIBDIR ?=
 
 ### Switches...
 # C++ code coverage  0/1 (from --prof-c)
-VM_PROFC = 1
+VM_PROFC = 0
 # SystemC output mode?  0/1 (from --sc)
 VM_SC = 0
 # Legacy or SystemC output mode?  0/1 (from --sc)
@@ -39,13 +39,17 @@ VM_USER_CFLAGS = \
 # User LDLIBS (from -LDFLAGS on Verilator command line)
 VM_USER_LDLIBS = \
 	-lreadline \
+	-lSDL2 \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
+	device \
 	expr \
+	keyboard \
 	log \
 	npcmain \
 	timer \
+	vga \
 	watchpoint \
 
 # User .cpp directories (from .cpp's on Verilator command line)
@@ -62,13 +66,19 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 ### Executable rules... (from --exe)
 VPATH += $(VM_USER_DIR)
 
+device.o: ./csrc/device.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 expr.o: ./csrc/expr.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+keyboard.o: ./csrc/keyboard.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 log.o: ./csrc/log.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 npcmain.o: ./csrc/npcmain.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 timer.o: ./csrc/timer.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+vga.o: ./csrc/vga.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 watchpoint.o: ./csrc/watchpoint.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

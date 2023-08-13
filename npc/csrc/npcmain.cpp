@@ -21,7 +21,6 @@ double sc_time_stamp()
 {
     return main_time;
 }
-
 ///////////////////////////////////NPC Command Part///////////////////////////
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -68,8 +67,8 @@ static int cmd_x(char *args){
    
    if((addr == NULL) || (len == NULL))
    {
-   printf("wrong format please try again\n");
-   printf("Format is x [N] [Location]\n");
+   Log("wrong format please try again");
+   Log("Format is x [N] [Location]");
    return 0;
    }
    
@@ -105,7 +104,7 @@ static int cmd_p(char *args){
    unsigned int expr_result;
    success = true;
    expr_result = expr(args,&success);
-   printf("result is %d\n",expr_result);
+   Log("result is %d",expr_result);
    return 0;
 }
 
@@ -142,9 +141,9 @@ char ebreak_flag = 0;
 extern "C" void ebreak(long long int code){
 	ebreak_flag = 1;
 	if(code == 0)
-	printf("HIT GOOD TRAP\n");
+	Log("HIT GOOD TRAP");
 	else
-	printf("HIT BAD TRAP\n");
+	Log("HIT BAD TRAP");
 } 
 
 
@@ -172,7 +171,7 @@ void dump_gpr(){
 unsigned long int isa_reg_str2val(const char *s) {
 	for (int i = 0;i<32;i++){	  
 	   if (strcmp("pc",s) == 0)
-	      return top->pc_now; 
+	      return top->test_wb_inst; 
 	   else if(strcmp(regs[i],s) == 0)
 	      return cpu_gpr[i];
 	}
@@ -188,12 +187,7 @@ unsigned long int isa_reg_str2val(const char *s) {
  //ff9ff2ef             jal     t0,-8  0xff,0x9f,0xf2,0xef
  //00100073		ebreak
 uint8_t instr[128] = {0x13,0x0e,0x80,0x00,0x93,0x0e,0xce,0xff,0x13,0x8f,0x0e,0x04,0xb7,0x02,0x00,0x00,0x97,0x42,0x00,0x00,0x73,0x00,0x10,0x00};
-/*****************************************io*************************************/
-#define DEVICE_BASE 0xa0000000
-#define SERIAL_PORT     (DEVICE_BASE + 0x00003f8)
-#define RTC_ADDR        (DEVICE_BASE + 0x0000048)
 //////////////////////////////////pmem//////////////////////////////////////////// 
-#define pmem_size 0x10000000
 static uint8_t pmem[pmem_size] PG_ALIGN = {};
 uint8_t* guest_to_host(long long paddr) { return pmem + paddr - 0x80000000;}
 uint8_t* guest_to_host_instr(long long paddr) { return instr + paddr - 0x80000000;}
@@ -222,7 +216,6 @@ extern "C" void pmem_read (long long raddr,long long *rdata){
 	long long a;
 	if(img_size == 0){
 	a = host_read(guest_to_host_instr(raddr),8);
-	//printf("1\n");
 	}
 	else{
 	a = host_read(guest_to_host(raddr),8);
@@ -237,7 +230,6 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
 	long long temp = 0x00000000000000ff;
 	for(int i = 0 ; i < 8 ; i++ ){
 		if(wmask & (0x01 << i)){
-			//printf("in %d\n",i);
 			mask |= (temp << (i * 8));
 		}
 	}
@@ -245,21 +237,22 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
 	
 	host_write(guest_to_host(waddr), 8, temp_data);
 }
-
 /***********************************test****************************************/
 uint64_t temp_mtime = 0;
 extern "C" void pmem_read_test(long long raddr,long long *rdata,char len){
-	long long a;
-	if(raddr == RTC_ADDR + 4){
-	temp_mtime = get_time();
-	*rdata = (temp_mtime >> 32);
-	return;
+	//long long a;
+	switch(raddr){
+	case RTC_ADDR + 4 : {temp_mtime = get_time(); *rdata = (temp_mtime >> 32);return;}
+	case RTC_ADDR :     {*rdata = (temp_mtime & 0x00000000ffffffff);return;}
+	case KBD_ADDR :     {*rdata = key_dequeue();return;}
+	case VGACTL_ADDR :  {*rdata = vgactl_port_base[0];return;}
+	default:            { 
+			      assert(raddr - 0x80000000 < pmem_size);    
+			      *rdata = (long long)host_read(guest_to_host(raddr),(int)len); 
+			      return;
+			     }
 	}
-	if(raddr == RTC_ADDR){
-	*rdata = (temp_mtime & 0x00000000ffffffff);
-	return;
-	}
-	
+	/*
 	if(img_size == 0){
 	a = host_read(guest_to_host_instr(raddr),(int)len);
 	//printf("1\n");
@@ -268,19 +261,36 @@ extern "C" void pmem_read_test(long long raddr,long long *rdata,char len){
 	a = host_read(guest_to_host(raddr),(int)len);
 	}
 	*rdata = (long long)a;
+	*/
 }
+
+uint32_t size_vga;
+
 extern "C" void pmem_write_test(long long waddr, long long wdata, char len) {
-	if(waddr == SERIAL_PORT)
-	putchar((char)wdata);
-	else{	
-	//printf("%llx\n",waddr);
-	host_write(guest_to_host(waddr), (int)len, wdata);
+	long long offset_min = waddr - FB_ADDR;
+	long long offset_max = waddr - size_vga - FB_ADDR;
+	bool ADDR_NOT_IN_FB = (offset_min < 0) || (offset_max > 0);
+	if(ADDR_NOT_IN_FB){
+		switch(waddr){
+		case SERIAL_PORT :     {putchar((char)wdata);return;}
+		case VGACTL_ADDR + 4 : {vgactl_port_base[1] = (uint32_t)wdata;return;}
+		default:               { 
+					 assert(waddr - 0x80000000 < pmem_size);
+					 host_write(guest_to_host(waddr), (int)len, wdata);
+					 return;
+					}
+		}
 	}
+	else{
+	host_write((uint8_t*)vmem + offset_min, (int)len, wdata);
+	return;
+	}
+	
 }
 ////////////////////////////////load outside instrcution part////////////////////////////////////
 static long load_img() {
   if (img_file == NULL) {
-    printf("No image is given. Use the default build-in image.\n");
+    Log("No image is given. Use the default build-in image.");
     return 0; // built-in image size
   }
 
@@ -290,7 +300,7 @@ static long load_img() {
   fseek(fp, 0, SEEK_END);
   long size = ftell(fp);
 
-  printf("The image is %s, size = %ld\n", img_file, size);
+  Log("The image is %s, size = %ld", img_file, size);
 
   fseek(fp, 0, SEEK_SET);
   int ret = fread(pmem, size, 1, fp);
@@ -305,12 +315,12 @@ static int parse_args(int argc, char *argv[]) {
     {0          , 0                , NULL,  0 },
     };
   int o;
-  while ( (o = getopt_long(argc, argv, "-bhl:d:p:", table, NULL)) != -1) {
+  while ( (o = getopt_long(argc, argv, "-l:d:p:", table, NULL)) != -1) {
     switch (o) {
       case 'l': log_file = optarg; break;
       case 1:   img_file = optarg;return 0;
       default:
-        printf("\t-f,--ftrace=FILE     read  elf file\n");
+        Log("\t-f,--ftrace=FILE     read  elf file");
         return 0;
     }
   }
@@ -334,13 +344,13 @@ static void reset(int n) {
 }
 
 unsigned long int temp = 0;
-//uint64_t *tempinst;
 unsigned char startover_flag = 0 ;
-
+uint64_t g_timer = 0;
+uint64_t inst_num = 0;
+uint64_t cycle_num = 0;
 void simmain(unsigned long int exectime){
-	//tempinst = (uint64_t*)malloc(sizeof(uint64_t));
     if (startover_flag == 1){
-    printf("This program is finished please lanch again to run other programs\n");
+    Log("This program is finished please lanch again to run other programs");
     return;
     }
     
@@ -360,27 +370,37 @@ void simmain(unsigned long int exectime){
     temp+= exectime;
     else
     temp = exectime;
- 
+    uint64_t timer_start = get_time();
     while (sc_time_stamp() < temp && (ebreak_flag == 0) && (NPC_STOP == 0)) 
-    {
+    {		
     		//pmem_read(top->pc_now,tempinst);
                 //top->inst = *(uint32_t *)tempinst;  
-                if (exectime != -1)
-        	printf("pc is 0x%016lx instrcution is 0x%08x\n",top->pc_now,top->inst);            
+                
+                if (exectime != -1){
+                Log("if_pc is 0x%lx instrcution is 0x%08x",top->test_if_pc,top->test_if_inst);                    
+                Log("id_pc is 0x%lx instrcution is 0x%08x",top->test_id_pc,top->test_id_inst);
+                Log("ex_pc is 0x%lx instrcution is 0x%08x",top->test_ex_pc,top->test_ex_inst);            
+        	Log("ls_pc is 0x%lx instrcution is 0x%08x",top->test_ls_pc,top->test_ls_inst);         	
+        	Log("wb_pc is 0x%lx instrcution is 0x%08x",top->test_wb_pc,top->test_wb_inst);                       
+  		}
   		
         	if (!watchpoints_expr()) {
                 NPC_STOP = 1;
                 temp = main_time + 1;
                 }  
-                
-                top->eval();
+                if((top->test_wb_inst != 0x00000013) && (top->npc_stall == 0))
+                inst_num++;
+                cycle_num++;
+                //top->eval();
                 #ifdef VCD_WAVE
 		tfp->dump(main_time); //dump wave
 		#endif
         	main_time++;
-        	single_cycle();  	
+        	single_cycle(); 
+        	device_update(&ebreak_flag); 
     }
-    
+    uint64_t timer_end = get_time();
+    g_timer += timer_end - timer_start;
     if((ebreak_flag==1) && (startover_flag == 0)){
     top->final();
     #ifdef VCD_WAVE
@@ -388,9 +408,14 @@ void simmain(unsigned long int exectime){
     #endif
     delete top;
     startover_flag = 1 ;
+    free_vga();
+    Log("inst num is %ld , time is %ld us",inst_num, g_timer);
+    Log("simulation frequency is %ld inst/s",(inst_num *1000000)/ g_timer);
+    Log("IPC is %lf",(double)inst_num/(double)cycle_num);
     } 
     
 } 
+
 /*****************************************main******************************************/ 
 
 void init_sdb() {
@@ -404,6 +429,9 @@ void init_sdb() {
 int main(int argc, char **argv)
 {
     init_sdb();
+    init_keymap();
+    init_vga(); 
+    size_vga = screen_size();
     parse_args(argc, argv);
     img_size = load_img();//pass arg
     assert(img_size < pmem_size);
@@ -432,7 +460,7 @@ int main(int argc, char **argv)
       							}
     					}
     					if (i == NR_CMD) 
-    						{ printf("Unknown command '%s'\n", cmd); }
+    						{ Log("Unknown command '%s'\n", cmd); }
     					}
     return 0;
 }

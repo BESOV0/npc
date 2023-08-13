@@ -10,11 +10,11 @@ module ysyx_22050598_sirv_gnrl_dfflr_with_resetval #(
   input               rst_n
 );
   reg [DW-1:0] qout_r;
-  always @(posedge clk or negedge rst_n) begin:DFFLR_WITH_RESETVAL
+  always @(posedge clk) begin:DFFLR_WITH_RESETVAL
     if (rst_n == 1'b0) 
     qout_r <= RESET_VAL;
     else if (lden == 1'b1) 
-    qout_r <= #1 dnxt;
+    qout_r <= dnxt;
   end
   assign qout = qout_r;
 endmodule
