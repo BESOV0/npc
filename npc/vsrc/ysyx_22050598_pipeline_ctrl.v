@@ -11,6 +11,10 @@ module ysyx_22050598_pipeline_ctrl (
     input         exu_is_mul        ,
     input         exu_is_div        ,
     input         exu_is_rem        ,
+    //ifu_stall
+    input         ifu_stall         ,
+    //load_store stall
+    input         lsu_unalign_stall ,
     //foward_stall
     input         forward_load_stall,
     output [4:0]  pipeline_stall    
@@ -29,5 +33,5 @@ module ysyx_22050598_pipeline_ctrl (
                               ({3{pc_flush_ena      }} & 3'b111) ;
 
     assign pipeline_stall   = ({5{forward_load_stall}} & 5'b00011) |
-                              ({5{muldiv_stall      }} & 5'b11111) ;
+                              ({5{muldiv_stall | lsu_unalign_stall | ifu_stall}} & 5'b11111) ;
 endmodule

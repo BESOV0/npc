@@ -41,6 +41,7 @@ wire        id_ex_w_reg_en         ;
 wire [4:0]  id_write_rd_idx        ;
 wire        id_ex_inst_is_ebreak   ;
 wire        id_ex_inst_is_ecall    ;
+wire        id_ex_inst_is_fencei   ;
 wire        id_ex_inst_is_jalr     ;
 wire        id_ex_inst_is_jal      ;
 wire        id_ex_inst_is_store    ;// inst is s type
@@ -79,6 +80,7 @@ wire [4:0]  ex_write_rd_idx        ;
 wire        ex_w_reg_en            ; 
 wire        ex_inst_is_ebreak      ;
 wire        ex_inst_is_ecall       ;
+wire        ex_inst_is_fencei      ;
 wire        ex_inst_is_jalr        ;
 wire        ex_inst_is_jal         ;
 wire        ex_inst_is_store       ;
@@ -131,6 +133,7 @@ wire          ls_load_unsigned   ;
 wire [31:0]    wb_inst           ;
 wire [63:0]    wb_pc             ;
 `endif
+wire          ls_unalign_stall   ;
 wire [63:0]   ls_wb_load_data    ;
 wire [63:0]   ls_rd_data         ;
 wire [63:0]   wb_rd_data         ;
@@ -140,6 +143,7 @@ wire          wb_inst_is_ebreak  ;
 /****************************************************pipeline crtl********************************************/
 wire [2:0]    pipeline_flush     ;
 wire [4:0]    pipeline_stall     ;
+wire          ifu_stall          ;
 /***************************************************instance**************************************************/
 /****************************************************ifu******************************************************/
 ysyx_22050598_ifu_bpu ysyx_22050598_ifu_bpu(
@@ -155,7 +159,8 @@ ysyx_22050598_ifu u_ysyx_22050598_ifu(
     .flush_pc_en             (pipeline_flush[0]     ),
     .flush_pc                (ex_pc_data            ),
     .prdt_pc_en              (if_prdt_taken         ),     
-    .prdt_pc_add_op          (if_bpu_pc_op          ),         
+    .prdt_pc_add_op          (if_bpu_pc_op          ),
+    .ifu_stall               (ifu_stall             ),         
     .pc_now                  (if_id_pc              ),
     .id_inst                 (if_id_inst            )
 );
@@ -183,6 +188,7 @@ ysyx_22050598_idu_decode u_ysyx_22050598_idu_decode (
     .id_write_rd_idx_o       (id_write_rd_idx       ),
     .id_inst_is_ebreak_o     (id_ex_inst_is_ebreak  ),
     .id_inst_is_ecall_o      (id_ex_inst_is_ecall   ),
+    .id_inst_is_fencei_o     (id_ex_inst_is_fencei  ),
     .id_inst_is_jalr_o       (id_ex_inst_is_jalr    ),
     .id_inst_is_jal_o        (id_ex_inst_is_jal     ),
     .id_inst_is_store_o      (id_ex_inst_is_store   ),
@@ -262,6 +268,7 @@ ysyx_22050598_idu_forward ysyx_22050598_idu_forward (
     .id_ex_w_reg_en          (id_ex_w_reg_en        ),
     .id_ex_inst_is_ebreak    (id_ex_inst_is_ebreak  ),
     .id_ex_inst_is_ecall     (id_ex_inst_is_ecall   ),
+    .id_ex_inst_is_fencei    (id_ex_inst_is_fencei  ),
     .id_ex_inst_is_jalr      (id_ex_inst_is_jalr    ),
     .id_ex_inst_is_jal       (id_ex_inst_is_jal     ),
     .id_ex_inst_is_store     (id_ex_inst_is_store   ),
@@ -288,6 +295,7 @@ ysyx_22050598_idu_forward ysyx_22050598_idu_forward (
     .id_ex_w_reg_en_o        (ex_w_reg_en           ), 
     .id_ex_inst_is_ebreak_o  (ex_inst_is_ebreak     ),
     .id_ex_inst_is_ecall_o   (ex_inst_is_ecall      ),
+    .id_ex_inst_is_fencei_o  (ex_inst_is_fencei     ),
     .id_ex_inst_is_jalr_o    (ex_inst_is_jalr       ),
     .id_ex_inst_is_jal_o     (ex_inst_is_jal        ),
     .id_ex_inst_is_store_o   (ex_inst_is_store      ),
@@ -396,12 +404,17 @@ ysyx_22050598_EX_LS u_ysyx_22050598_EX_LS (
 );
 /****************************************************lsu*******************************************************/
 ysyx_22050598_lsu u_ysyx_22050598_lsu (
+    .inst_ls                 (ls_inst               ),
+    .pc_ls                   (ls_pc                 ),
+    .clk                     (clk                   ),
+    .rst                     (rst                   ),
     .ls_store_data           (ls_store_data         ),
     .ls_loc                  (ls_alu_rd_ls_data     ),
     .load_en                 (ls_load_en            ),
     .store_en                (ls_store_en           ),
     .ls_type                 (ls_ls_data_type       ),
     .load_unsigned           (ls_load_unsigned      ),
+    .unalign_stall           (ls_unalign_stall      ),
     .load_data_o             (ls_wb_load_data       )
 );
 ysyx_22050598_lsu_rd_mux ysyx_22050598_lsu_rd_mux (
@@ -433,6 +446,7 @@ ysyx_22050598_LS_WB ysyx_22050598_LS_WB (
 /****************************************************ctrl*******************************************************/
 ysyx_22050598_EBREAK u_ysyx_22050598_EBREAK(
 .ebreak_flag                 (wb_inst_is_ebreak     ),
+.fencei_flag                 (ex_inst_is_fencei     ),
 .ebreak_a0                   (ebreak_a0             )
 );
 
@@ -446,6 +460,8 @@ ysyx_22050598_pipeline_ctrl ysyx_22050598_pipeline_ctrl (
     .exu_is_mul              (ex_op_type[7]         ),
     .exu_is_div              (ex_op_type[6]         ),
     .exu_is_rem              (ex_op_type[5]         ),
+    .ifu_stall               (ifu_stall             ),
+    .lsu_unalign_stall       (ls_unalign_stall      ),
     //.if_id_ebreak            (id_ex_inst_is_ebreak  ),
     .pipeline_flush          (pipeline_flush        ),
     .pipeline_stall          (pipeline_stall        )
@@ -462,6 +478,6 @@ assign   test_ls_pc     = ls_pc      ;
 assign   test_ls_inst   = ls_inst    ;
 assign   test_wb_pc     = wb_pc      ; 
 assign   test_wb_inst   = wb_inst    ;
-assign   npc_stall      = |pipeline_stall ;
+assign   npc_stall      = &pipeline_stall ;
 `endif
 endmodule

@@ -20,6 +20,7 @@ module ysyx_22050598_ID_EX (
     //inst type
     input            id_ex_inst_is_ebreak     ,
     input            id_ex_inst_is_ecall      ,
+    input            id_ex_inst_is_fencei     ,
     input            id_ex_inst_is_jalr       ,
     input            id_ex_inst_is_jal        ,
     input            id_ex_inst_is_store      ,
@@ -51,6 +52,7 @@ module ysyx_22050598_ID_EX (
     //inst type
     output           id_ex_inst_is_ebreak_o   ,
     output           id_ex_inst_is_ecall_o    ,
+    output           id_ex_inst_is_fencei_o   ,
     output           id_ex_inst_is_jalr_o     ,
     output           id_ex_inst_is_jal_o      ,
     output           id_ex_inst_is_store_o    ,
@@ -71,7 +73,8 @@ module ysyx_22050598_ID_EX (
     output           id_ex_inst_is_illegal_o 
 );
 
-    wire [8:0]  id_ex_inst_bus = {
+    wire [9:0]  id_ex_inst_bus = {
+                                  id_ex_inst_is_fencei  ,
                                   id_ex_inst_is_ebreak  , 
                                   id_ex_inst_is_ecall   , 
                                   id_ex_inst_is_jalr    , 
@@ -82,7 +85,7 @@ module ysyx_22050598_ID_EX (
                                   id_ex_inst_5_shamt    , 
                                   id_ex_inst_is_mret
                                  };
-    wire [8:0]  temp_id_ex_inst_bus         = id_ex_flush ? 9'b0           : id_ex_inst_bus         ;
+    wire [9:0]  temp_id_ex_inst_bus         = id_ex_flush ? 10'b0          : id_ex_inst_bus         ;
     wire [9:0]  temp_id_ex_op_type          = id_ex_flush ? 10'b1000000000 : id_ex_op_type          ;
     wire [63:0] temp_alu_op_a               = id_ex_flush ? 64'b0          : alu_op_a               ;
     wire [63:0] temp_alu_op_b               = id_ex_flush ? 64'b0          : alu_op_b               ;  
@@ -100,7 +103,7 @@ module ysyx_22050598_ID_EX (
     wire        temp_id_ex_inst_is_rv64     = id_ex_flush ? 1'b0           : id_ex_inst_is_rv64     ;
     wire        temp_id_ex_inst_is_illegal  = id_ex_flush ? 1'b0           : id_ex_inst_is_illegal  ;
 
-    wire [8:0]  id_ex_inst_bus_r        ;
+    wire [9:0]  id_ex_inst_bus_r        ;
     wire [9:0]  id_ex_op_type_r         ;
     wire [63:0] alu_op_a_r              ;
     wire [63:0] alu_op_b_r              ;
@@ -129,7 +132,7 @@ module ysyx_22050598_ID_EX (
 
     wire id_ex_den                  = id_ex_en & (id_ex_inst_btype | id_ex_inst_is_store | id_inst_is_csri);
 
-    ysyx_22050598_sirv_gnrl_dfflr #(9)  id_ex_inst_bus_dfflr          (id_ex_en     , temp_id_ex_inst_bus         , id_ex_inst_bus_r        , clk, rst);
+    ysyx_22050598_sirv_gnrl_dfflr #(10)  id_ex_inst_bus_dfflr         (id_ex_en     , temp_id_ex_inst_bus         , id_ex_inst_bus_r        , clk, rst);
     ysyx_22050598_sirv_gnrl_dfflr #(10) id_ex_op_type_dfflr           (id_ex_en     , temp_id_ex_op_type          , id_ex_op_type_r         , clk, rst);
     ysyx_22050598_sirv_gnrl_dfflr #(64) alu_op_a_dfflr                (id_ex_en     , temp_alu_op_a               , alu_op_a_r              , clk, rst);
     ysyx_22050598_sirv_gnrl_dfflr #(64) alu_op_b_dfflr                (id_ex_en     , temp_alu_op_b               , alu_op_b_r              , clk, rst);
@@ -161,6 +164,7 @@ module ysyx_22050598_ID_EX (
     assign id_ex_bs_zimm_data_o    = id_ex_bs_zimm_data_r    ;
     assign id_write_rd_idx_o       = id_write_rd_idx_r       ;
     assign id_ex_w_reg_en_o        = id_ex_w_reg_en_r        ;
+    assign id_ex_inst_is_fencei_o  = id_ex_inst_bus_r[9]     ;
     assign id_ex_inst_is_ebreak_o  = id_ex_inst_bus_r[8]     ;
     assign id_ex_inst_is_ecall_o   = id_ex_inst_bus_r[7]     ;
     assign id_ex_inst_is_jalr_o    = id_ex_inst_bus_r[6]     ;

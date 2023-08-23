@@ -141,11 +141,14 @@ char ebreak_flag = 0;
 extern "C" void ebreak(long long int code){
 	ebreak_flag = 1;
 	if(code == 0)
-	Log("HIT GOOD TRAP");
+	Log("%s",ANSI_FMT("HIT GODD TRAP", ANSI_FG_GREEN));
 	else
-	Log("HIT BAD TRAP");
+	Log("%s",ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED));
 } 
 
+extern "C" void fencei(){
+	Log("%s",ANSI_FMT("FENCEI IN", ANSI_FG_GREEN));
+} 
 
 uint64_t *cpu_gpr = NULL;
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
@@ -218,13 +221,18 @@ extern "C" void pmem_read (long long raddr,long long *rdata){
 	a = host_read(guest_to_host_instr(raddr),8);
 	}
 	else{
+	if(raddr < 0x80000000){
+	printf("%llx\n",raddr);
+	}
+	assert(raddr - 0x80000000 >= 0);
+	assert(raddr - 0x80000000 < pmem_size);
 	a = host_read(guest_to_host(raddr),8);
 	}
 	*rdata = (long long)a;
 }
 
-extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
-	long long rdata;
+void pmem_write(long long waddr, long long wdata, char wmask) {
+	uint64_t rdata;
 	rdata = host_read(guest_to_host(waddr),8);
 	long long mask = 0 ;
 	long long temp = 0x00000000000000ff;
@@ -233,40 +241,36 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
 			mask |= (temp << (i * 8));
 		}
 	}
-	long long temp_data = (wdata & mask) | rdata;
-	
+	long long temp_data = (wdata & mask) | (rdata & ~mask);
 	host_write(guest_to_host(waddr), 8, temp_data);
 }
 /***********************************test****************************************/
 uint64_t temp_mtime = 0;
-extern "C" void pmem_read_test(long long raddr,long long *rdata,char len){
-	//long long a;
+extern "C" void pmem_read_test(long long raddr,long long *rdata,char len,long long addr, int inst){
 	switch(raddr){
 	case RTC_ADDR + 4 : {temp_mtime = get_time(); *rdata = (temp_mtime >> 32);return;}
 	case RTC_ADDR :     {*rdata = (temp_mtime & 0x00000000ffffffff);return;}
 	case KBD_ADDR :     {*rdata = key_dequeue();return;}
 	case VGACTL_ADDR :  {*rdata = vgactl_port_base[0];return;}
-	default:            { 
+	default:            { 	
+			   /* if(raddr < 0x0000000080000000){
+				printf("0x%016llx\n",raddr);
+				printf("0x%016llx\n",addr);
+				printf("0x%08x\n",inst);
+				*rdata = 0;
+				return;
+				}
+				*/
+			      assert(raddr - 0x80000000 >= 0);
 			      assert(raddr - 0x80000000 < pmem_size);    
 			      *rdata = (long long)host_read(guest_to_host(raddr),(int)len); 
 			      return;
 			     }
 	}
-	/*
-	if(img_size == 0){
-	a = host_read(guest_to_host_instr(raddr),(int)len);
-	//printf("1\n");
-	}
-	else{
-	a = host_read(guest_to_host(raddr),(int)len);
-	}
-	*rdata = (long long)a;
-	*/
 }
 
 uint32_t size_vga;
-
-extern "C" void pmem_write_test(long long waddr, long long wdata, char len) {
+extern "C" void pmem_write_test(long long waddr, long long wdata,char len, char wmask) {
 	long long offset_min = waddr - FB_ADDR;
 	long long offset_max = waddr - size_vga - FB_ADDR;
 	bool ADDR_NOT_IN_FB = (offset_min < 0) || (offset_max > 0);
@@ -275,8 +279,11 @@ extern "C" void pmem_write_test(long long waddr, long long wdata, char len) {
 		case SERIAL_PORT :     {putchar((char)wdata);return;}
 		case VGACTL_ADDR + 4 : {vgactl_port_base[1] = (uint32_t)wdata;return;}
 		default:               { 
+					 assert(waddr - 0x80000000 >= 0);
 					 assert(waddr - 0x80000000 < pmem_size);
-					 host_write(guest_to_host(waddr), (int)len, wdata);
+					 //printf("Cache In\n");
+					 pmem_write(waddr,wdata,wmask);
+					 //host_write(guest_to_host(waddr), (int)len, wdata);
 					 return;
 					}
 		}
@@ -284,8 +291,7 @@ extern "C" void pmem_write_test(long long waddr, long long wdata, char len) {
 	else{
 	host_write((uint8_t*)vmem + offset_min, (int)len, wdata);
 	return;
-	}
-	
+	}	
 }
 ////////////////////////////////load outside instrcution part////////////////////////////////////
 static long load_img() {
@@ -460,7 +466,7 @@ int main(int argc, char **argv)
       							}
     					}
     					if (i == NR_CMD) 
-    						{ Log("Unknown command '%s'\n", cmd); }
+    						{ Log("Unknown command '%s' ", cmd); }
     					}
     return 0;
 }

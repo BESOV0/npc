@@ -15,6 +15,7 @@ module ysyx_22050598_idu_decode (
     //Decode Ctrl Signal
     output        id_inst_is_ebreak_o   ,
     output        id_inst_is_ecall_o    ,
+    output        id_inst_is_fencei_o   ,
     output        id_inst_is_jalr_o     ,
     output        id_inst_is_jal_o      ,
     output        id_inst_is_store_o    ,// inst is s type
@@ -47,15 +48,15 @@ module ysyx_22050598_idu_decode (
     wire func3_111     =  func3[2] &  func3[1] &  func3[0] ;
     //Decode funct7 Part
     wire [6:0] func7  = id_inst_i[31:25];
-    wire func7_0000000 = ~(|func7[5:0]) ;
-    wire func7_0100000 =  func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
-    wire func7_0000001 = ~func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] &  func7[0] ;
-    wire func7_0000100 = ~func7[5] & ~func7[4] & ~func7[3] &  func7[2] & ~func7[1] & ~func7[0] ;
-    wire func7_0001000 = ~func7[5] & ~func7[4] &  func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
-    wire func7_0010000 = ~func7[5] &  func7[4] & ~func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
-    wire func7_0011000 = ~func7[5] &  func7[4] &  func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;   
-    wire func6_010000  =  func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] ;
-    wire func6_000000  = ~(|func7[5:1]);
+    wire func7_0000000 = ~(|func7) ;
+    wire func7_0100000 = ~func7[6] &  func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0000001 = ~func7[6] & ~func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] &  func7[0] ;
+    wire func7_0000100 = ~func7[6] & ~func7[5] & ~func7[4] & ~func7[3] &  func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0001000 = ~func7[6] & ~func7[5] & ~func7[4] &  func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0010000 = ~func7[6] & ~func7[5] &  func7[4] & ~func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;
+    wire func7_0011000 = ~func7[6] & ~func7[5] &  func7[4] &  func7[3] & ~func7[2] & ~func7[1] & ~func7[0] ;   
+    wire func6_010000  = ~func7[6] &  func7[5] & ~func7[4] & ~func7[3] & ~func7[2] & ~func7[1] ;
+    wire func6_000000  = ~(|func7[6:1]);
     //Decode Reg Part
     wire [4:0] rs1_idx = id_inst_i[19:15];
     wire [4:0] rs2_idx = id_inst_i[24:20];
@@ -81,6 +82,7 @@ module ysyx_22050598_idu_decode (
     wire opcode_store  = ~(|(opcode ^ `ysyx_22050598_OPCODE_STORE  ));
     wire opcode_lui    = ~(|(opcode ^ `ysyx_22050598_OPCODE_LUI    ));
     wire opcode_system = ~(|(opcode ^ `ysyx_22050598_OPCODE_SYSTEM ));
+    wire opcode_fence  = ~(|(opcode ^ `ysyx_22050598_OPCODE_FENCE  ));
     //**************decode which instruction******************
     //Immediate operation instruction
     wire inst_addi     = (opcode_alui & func3_000);
@@ -157,6 +159,7 @@ module ysyx_22050598_idu_decode (
     wire inst_ebreak   = (opcode_system & func3_000 & func7_0000000 & rs1_00000 & rs2_00001 & rd_00000);
     wire inst_ecall    = (opcode_system & func3_000 & func7_0000000 & rs1_00000 & rs2_00000 & rd_00000);
     wire inst_mret     = (opcode_system & func3_000 & func7_0011000 & rs1_00000 & rs2_00010 & rd_00000);
+    wire inst_fencei   = (opcode_fence  & func3_001 & func7_0000000 & rs1_00000 & rs2_00000 & rd_00000);
     //csr instruction
     wire inst_csrrw    = (opcode_system & func3_001);
     wire inst_csrrs    = (opcode_system & func3_010);
@@ -240,6 +243,7 @@ module ysyx_22050598_idu_decode (
 
     assign id_inst_is_ebreak_o = inst_ebreak;
     assign id_inst_is_ecall_o  = inst_ecall;
+    assign id_inst_is_fencei_o = inst_fencei;
     assign id_inst_is_mret_o   = inst_mret;
     assign id_inst_is_jalr_o   = inst_jalr ;
     assign id_inst_is_jal_o    = opcode_jal;
