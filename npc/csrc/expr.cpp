@@ -340,7 +340,7 @@ void deref_expr(){
 	  word_t addr;
           tokens[i].type = DEREF;          
           addr = strtol(tokens[i+1].str,&str,16);
-          pmem_read(addr,data);
+          pmem_read_test(addr,data,8);
           sprintf(tokens[i].str,"%x",*(unsigned int *)data); 
          // printf("0x%02x\n" , mem & 0xff);
          //break;  

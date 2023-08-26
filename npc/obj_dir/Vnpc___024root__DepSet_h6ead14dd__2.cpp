@@ -13,25 +13,29 @@ void Vnpc___024root___nba_sequent__TOP__2(Vnpc___024root* vlSelf);
 void Vnpc___024root___nba_sequent__TOP__3(Vnpc___024root* vlSelf);
 void Vnpc___024root___nba_sequent__TOP__4(Vnpc___024root* vlSelf);
 void Vnpc___024root___nba_sequent__TOP__5(Vnpc___024root* vlSelf);
+void Vnpc___024root___nba_sequent__TOP__6(Vnpc___024root* vlSelf);
 
 void Vnpc___024root___eval_nba(Vnpc___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
     Vnpc__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vnpc___024root___eval_nba\n"); );
     // Body
-    if (vlSelf->__VnbaTriggered.at(2U)) {
+    if (vlSelf->__VnbaTriggered.at(1U)) {
         Vnpc___024root___nba_sequent__TOP__0(vlSelf);
     }
-    if (vlSelf->__VnbaTriggered.at(0U)) {
+    if (vlSelf->__VnbaTriggered.at(3U)) {
         Vnpc___024root___nba_sequent__TOP__1(vlSelf);
+    }
+    if (vlSelf->__VnbaTriggered.at(0U)) {
         Vnpc___024root___nba_sequent__TOP__2(vlSelf);
         Vnpc___024root___nba_sequent__TOP__3(vlSelf);
-    }
-    if (vlSelf->__VnbaTriggered.at(1U)) {
         Vnpc___024root___nba_sequent__TOP__4(vlSelf);
     }
-    if (vlSelf->__VnbaTriggered.at(0U)) {
+    if (vlSelf->__VnbaTriggered.at(2U)) {
         Vnpc___024root___nba_sequent__TOP__5(vlSelf);
+    }
+    if (vlSelf->__VnbaTriggered.at(0U)) {
+        Vnpc___024root___nba_sequent__TOP__6(vlSelf);
     }
 }
 
@@ -49,7 +53,7 @@ void Vnpc___024root___eval(Vnpc___024root* vlSelf) {
     Vnpc__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vnpc___024root___eval\n"); );
     // Init
-    VlTriggerVec<3> __VpreTriggered;
+    VlTriggerVec<4> __VpreTriggered;
     IData/*31:0*/ __VnbaIterCount;
     CData/*0:0*/ __VnbaContinue;
     // Body

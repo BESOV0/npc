@@ -9,7 +9,11 @@ input           prdt_pc_en        ,
 input  [63:0]   prdt_pc_add_op    ,
 output          ifu_stall         ,         
 output [63:0]   pc_now            ,
-output [31:0]   id_inst
+output [31:0]   id_inst           ,
+output [63:0]   ifu_mem_addr      ,
+output          ifu_mem_valid     ,
+input  [127:0]  ifu_mem_data      ,
+input           ifu_mem_ready      
 );
 wire        pc_r_ena ;
 wire [63:0] pc_in    ;
@@ -28,31 +32,11 @@ ysyx_22050598_sirv_gnrl_dfflr_with_resetval #(64,64'h0000000080000000) pc_dfflr_
 
 wire [63:0] raddr = {pc_r[63:3],3'b0};
 wire [63:0] rdata;
-/*
-assign ifu_stall = 1'b0 ;
-import "DPI-C" function void pmem_read (input longint raddr, output longint rdata);
-always @(*) begin
-    if(rst == 1'b1)
-    pmem_read(raddr, rdata);
-    else
-    pmem_read(64'h0000000080000000,rdata);
-end
-assign pc_now = pc_r;
-assign id_inst = ({32{pc_r[2:0] == 3'b000}} & rdata[31:0]) |
-                 ({32{pc_r[2:0] == 3'b100}} & rdata[63:32]);
-*/
 
 wire            cpu_data_ok     ;
-wire [63:0]     temp_mem_addr   ;
-wire [63:0]     mem_addr        ;
-wire [127:0]    mem_r_data      ;
-wire            mem_r_req       ;
-wire            mem_req_ready_r ;
+wire [63:0]     ifu_req_addr    ;
+wire            ifu_r_req       ;
 
-wire [63:0] temp_mem_data ;
-wire [63:0] temp_mem_data_r;
-
-assign ifu_stall  = ~cpu_data_ok ;
 ysyx_22050598_cache u_ysyx_22050598_icache (
     .clk                    (clk            ),
     .rst                    (rst            ),
@@ -63,33 +47,20 @@ ysyx_22050598_cache u_ysyx_22050598_icache (
     .cpu_write_data         (64'b0          ),
     .cpu_data_ok            (cpu_data_ok    ),
     .cpu_read_data          (rdata          ),
-    .mem_req_addr           (temp_mem_addr  ),
+    .mem_req_addr           (ifu_req_addr   ),
     .mem_w_data             (),
-    .mem_req_r              (mem_r_req      ), 
+    .mem_req_r              (ifu_r_req      ), 
     .mem_req_w              (),   
-    .mem_r_data             (mem_r_data     ),
-    .mem_req_ready          (mem_req_ready_r)
+    .mem_r_data             (ifu_mem_data   ),
+    .mem_req_ready          (ifu_mem_ready  )
 );
 
-wire mem_ready = ~mem_req_ready_r;
-ysyx_22050598_sirv_gnrl_dfflr #(1) mem_req_ready_dfflr(mem_r_req, mem_ready, mem_req_ready_r, clk, rst);
+assign ifu_mem_addr  = ifu_req_addr     ;
+assign ifu_mem_valid = ifu_r_req        ;
 
-ysyx_22050598_sirv_gnrl_dfflr #(64) icache_mem_dfflr(mem_r_req, temp_mem_data, temp_mem_data_r, clk, rst);
-assign mem_r_data = {temp_mem_data, temp_mem_data_r};
-
-assign mem_addr = mem_req_ready_r ? {temp_mem_addr[63:4],4'b1000} : {temp_mem_addr[63:4],4'b0000};
-
-import "DPI-C" function void pmem_read (input longint raddr, output longint rdata);
-always @(*) begin
-    if(mem_r_req == 1'b1)
-    pmem_read(mem_addr, temp_mem_data);
-    else
-    pmem_read(64'h0000000083008ed0,temp_mem_data);
-    
-end
-
-assign pc_now = pc_r;
-assign id_inst = ({32{~pc_r[2]}} & rdata[31:0]) |
-                 ({32{ pc_r[2]}} & rdata[63:32]);
+assign pc_now        = pc_r             ;
+assign ifu_stall     = ~cpu_data_ok     ;
+assign id_inst       = ({32{~pc_r[2]}} & rdata[31:0]) |
+                       ({32{ pc_r[2]}} & rdata[63:32]);
 
 endmodule

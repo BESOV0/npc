@@ -29,6 +29,8 @@
 `define ysyx_22050598_ALU_XLEN         64
 //Test
 `define ysyx_22050598_Test 
+//AXI AXSIZE
+`define ysyx_22050598_AXI_SIZE_8Byte   3'b011
 //AXI BRUST
 `define ysyx_22050598_AXI_BURST_TYPE_FIXED               2'b00
 `define ysyx_22050598_AXI_BURST_TYPE_INCR                2'b01

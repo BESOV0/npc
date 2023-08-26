@@ -1,6 +1,4 @@
 module ysyx_22050598_lsu (
-    input [31:0]    inst_ls         ,
-    input [63:0]    pc_ls           ,
     input           clk             ,
     input           rst             ,
     input [63:0]    ls_store_data   ,
@@ -9,8 +7,17 @@ module ysyx_22050598_lsu (
     input           store_en        ,
     input [1:0]     ls_type         ,
     input           load_unsigned   ,
+    input           lsu_stall       ,
     output          unalign_stall   ,
-    output [63:0]   load_data_o
+    output [63:0]   load_data_o     ,
+    output [63:0]   lsu_mem_addr    ,
+    output [127:0]  lsu_mem_wdata   ,
+    output          lsu_mem_r_req   ,
+    output          lsu_mem_w_req   ,
+    output          lsu_is_device   ,
+    output [7:0]    lsu_wmask       ,
+    input  [127:0]  lsu_mem_rdata   ,
+    input           lsu_mem_ready
 );
 /****************************************************Device******************************************************/
     wire addr_is_device = (ls_loc[31] & ~ls_loc[30] & ls_loc[29] & ~ls_loc[28]) ;
@@ -19,14 +26,16 @@ module ysyx_22050598_lsu (
     wire unalign_state_r                               ; 
     wire state_is_lsu_idle         = ~unalign_state_r  ;
     wire state_is_lsu_unalign      =  unalign_state_r  ;
-/*
-    wire state_is_lsu_idle_nxt     = 1'b1          ;
-    wire state_is_lsu_unalign_nxt  = 1'b0          ;
-*/
+
     wire lsu_unalign ;
+    wire device_sta_is_done ;
     wire lsu_ena = (load_en | store_en) ;
-    wire state_is_idle_exit_ena    =  state_is_lsu_idle & lsu_unalign & ~addr_is_device & lsu_ena & cpu_data_ok;//shake should change
-    wire state_is_unalign_exit_ena =  state_is_lsu_unalign & cpu_data_ok;//shake should change
+    wire device_exit_ena = ( addr_is_device & lsu_mem_ready) | device_sta_is_done;
+    wire normal_exit_ena = (~addr_is_device & cpu_data_ok  );
+    wire exit_ena = (device_exit_ena | normal_exit_ena);
+
+    wire state_is_idle_exit_ena    =  state_is_lsu_idle & lsu_unalign & lsu_ena & exit_ena ;//shake should change
+    wire state_is_unalign_exit_ena =  state_is_lsu_unalign & exit_ena;//shake should change
 
     wire unalign_state_ena = state_is_idle_exit_ena | state_is_unalign_exit_ena ;
     wire unalign_state_nxt = state_is_lsu_idle;
@@ -65,10 +74,10 @@ module ysyx_22050598_lsu (
                          (size_d & ~loc_000);
     
     wire [63:0] rdata;
-    wire [63:0] temp_mem_data   ;
-    wire [63:0] align_rdata         = ({64{~lsu_unalign & ~addr_is_device}} & rdata) | ({64{addr_is_device}} & temp_mem_data);
-    wire unalign_load_data_ena      = (lsu_unalign & state_is_lsu_idle & load_en);
-    wire [63:0] idle_unalign_rdata  = rdata ;
+    wire [63:0] device_load_data  = ({64{device_sta_is_done}} & device_load_data_r) | ({64{~device_sta_is_done}} & lsu_mem_rdata[63:0]);
+    wire [63:0] align_rdata       = ({64{~lsu_unalign & ~addr_is_device}} & rdata) | ({64{addr_is_device}} & device_load_data);
+    wire unalign_load_data_ena    = (lsu_unalign & state_is_lsu_idle & load_en);
+    wire [63:0] unalign_rdata     = ({64{~addr_is_device}} & rdata) | ({64{addr_is_device}} & device_load_data);
 
     wire [7:0] align_load_data_b  = ({8{loc_000}} & align_rdata[7:0])    |
                                     ({8{loc_001}} & align_rdata[15:8])   |
@@ -99,42 +108,39 @@ module ysyx_22050598_lsu (
                                     ({64{size_d}}  & align_rdata ) ;
 
     wire [55:0] idle_unalign_load_data_r ;
-    wire [55:0] idle_unalign_load_data  = ({56{unalign_d_010}} & {8'b0 ,idle_unalign_rdata[63:16]}) |
-                                          ({56{unalign_d_011}} & {16'b0,idle_unalign_rdata[63:24]}) |
-                                          ({56{unalign_d_100}} & {24'b0,idle_unalign_rdata[63:32]}) |
-                                          ({56{unalign_w_101}} & {32'b0,idle_unalign_rdata[63:40]}) |
-                                          ({56{unalign_d_101}} & {32'b0,idle_unalign_rdata[63:40]}) |
-                                          ({56{unalign_w_110}} & {40'b0,idle_unalign_rdata[63:48]}) |
-                                          ({56{unalign_d_110}} & {40'b0,idle_unalign_rdata[63:48]}) |
-                                          ({56{unalign_h_111}} & {48'b0,idle_unalign_rdata[63:56]}) |
-                                          ({56{unalign_w_111}} & {48'b0,idle_unalign_rdata[63:56]}) |
-                                          ({56{unalign_d_111}} & {48'b0,idle_unalign_rdata[63:56]}) |
-                                          ({56{unalign_d_001}} & idle_unalign_rdata[63:8]         ) ;
+    wire [55:0] idle_unalign_load_data  = ({56{unalign_d_010}} & {8'b0 ,unalign_rdata[63:16]}) |
+                                          ({56{unalign_d_011}} & {16'b0,unalign_rdata[63:24]}) |
+                                          ({56{unalign_d_100}} & {24'b0,unalign_rdata[63:32]}) |
+                                          ({56{unalign_w_101}} & {32'b0,unalign_rdata[63:40]}) |
+                                          ({56{unalign_d_101}} & {32'b0,unalign_rdata[63:40]}) |
+                                          ({56{unalign_w_110}} & {40'b0,unalign_rdata[63:48]}) |
+                                          ({56{unalign_d_110}} & {40'b0,unalign_rdata[63:48]}) |
+                                          ({56{unalign_h_111}} & {48'b0,unalign_rdata[63:56]}) |
+                                          ({56{unalign_w_111}} & {48'b0,unalign_rdata[63:56]}) |
+                                          ({56{unalign_d_111}} & {48'b0,unalign_rdata[63:56]}) |
+                                          ({56{unalign_d_001}} & unalign_rdata[63:8]         ) ;
 
-    wire [63:0] temp_unalign_load_data = ({64{unalign_h_111 & state_is_lsu_unalign}} & {48'b0,rdata[7:0] ,idle_unalign_load_data_r[7:0] }) |
-                                         ({64{unalign_w_101 & state_is_lsu_unalign}} & {32'b0,rdata[7:0] ,idle_unalign_load_data_r[23:0]}) |
-                                         ({64{unalign_w_110 & state_is_lsu_unalign}} & {32'b0,rdata[15:0],idle_unalign_load_data_r[15:0]}) |
-                                         ({64{unalign_w_111 & state_is_lsu_unalign}} & {32'b0,rdata[23:0],idle_unalign_load_data_r[7:0] }) |
-                                         ({64{unalign_d_001 & state_is_lsu_unalign}} & {rdata[7:0] ,idle_unalign_load_data_r[55:0]}) |
-                                         ({64{unalign_d_010 & state_is_lsu_unalign}} & {rdata[15:0],idle_unalign_load_data_r[47:0]}) |
-                                         ({64{unalign_d_011 & state_is_lsu_unalign}} & {rdata[23:0],idle_unalign_load_data_r[39:0]}) |
-                                         ({64{unalign_d_100 & state_is_lsu_unalign}} & {rdata[31:0],idle_unalign_load_data_r[31:0]}) |
-                                         ({64{unalign_d_101 & state_is_lsu_unalign}} & {rdata[39:0],idle_unalign_load_data_r[23:0]}) |
-                                         ({64{unalign_d_110 & state_is_lsu_unalign}} & {rdata[47:0],idle_unalign_load_data_r[15:0]}) |
-                                         ({64{unalign_d_111 & state_is_lsu_unalign}} & {rdata[55:0],idle_unalign_load_data_r[7:0]})  ;
+    wire [63:0] temp_unalign_load_data = ({64{unalign_h_111 & state_is_lsu_unalign}} & {48'b0,unalign_rdata[7:0] ,idle_unalign_load_data_r[7:0] }) |
+                                         ({64{unalign_w_101 & state_is_lsu_unalign}} & {32'b0,unalign_rdata[7:0] ,idle_unalign_load_data_r[23:0]}) |
+                                         ({64{unalign_w_110 & state_is_lsu_unalign}} & {32'b0,unalign_rdata[15:0],idle_unalign_load_data_r[15:0]}) |
+                                         ({64{unalign_w_111 & state_is_lsu_unalign}} & {32'b0,unalign_rdata[23:0],idle_unalign_load_data_r[7:0] }) |
+                                         ({64{unalign_d_001 & state_is_lsu_unalign}} & {unalign_rdata[7:0] ,idle_unalign_load_data_r[55:0]})       |
+                                         ({64{unalign_d_010 & state_is_lsu_unalign}} & {unalign_rdata[15:0],idle_unalign_load_data_r[47:0]})       |
+                                         ({64{unalign_d_011 & state_is_lsu_unalign}} & {unalign_rdata[23:0],idle_unalign_load_data_r[39:0]})       |
+                                         ({64{unalign_d_100 & state_is_lsu_unalign}} & {unalign_rdata[31:0],idle_unalign_load_data_r[31:0]})       |
+                                         ({64{unalign_d_101 & state_is_lsu_unalign}} & {unalign_rdata[39:0],idle_unalign_load_data_r[23:0]})       |
+                                         ({64{unalign_d_110 & state_is_lsu_unalign}} & {unalign_rdata[47:0],idle_unalign_load_data_r[15:0]})       |
+                                         ({64{unalign_d_111 & state_is_lsu_unalign}} & {unalign_rdata[55:0],idle_unalign_load_data_r[7:0]})        ;
                                      
     wire [63:0] unalign_load_data = ({64{size_h}}  & {{48{temp_unalign_load_data[15] & ~load_unsigned}},temp_unalign_load_data[15:0]}) | 
                                     ({64{size_w}}  & {{32{temp_unalign_load_data[31] & ~load_unsigned}},temp_unalign_load_data[31:0]}) |
                                     ({64{size_d}}  & temp_unalign_load_data ) ;                                 
 
-    wire [63:0] raddr = ({64{state_is_lsu_idle & ~addr_is_device}} & {ls_loc[63:3],3'b0})            | 
-                        ({64{state_is_lsu_idle &  addr_is_device}} & ls_loc)                         |
-                        ({64{state_is_lsu_unalign & ~addr_is_device}} & {ls_loc[63:3] + 1'b1, 3'b0}) ;
+    wire [63:0] cache_addr = ({64{state_is_lsu_idle}} & {ls_loc[63:3],3'b0})                                | 
+                             ({64{state_is_lsu_unalign & ~addr_is_device}} & {ls_loc[63:3] + 1'b1, 3'b0})   ;
     wire [63:0] load_data  = ({64{state_is_lsu_idle}} & align_load_data) | ({64{state_is_lsu_unalign}} & unalign_load_data );
     ysyx_22050598_sirv_gnrl_dfflr #(56) unalign_load_data_dfflr(unalign_load_data_ena, idle_unalign_load_data, idle_unalign_load_data_r, clk, rst);
 /*****************************************************************STORE******************************************************/
-    wire [63:0] waddr = raddr;
-    wire [63:0] wdata;
     wire [7:0]  wmask;
 
     wire [7:0] idle_wmask_b = ({8{loc_000}} & 8'b00000001)  |
@@ -253,107 +259,86 @@ module ysyx_22050598_lsu (
 
     wire [63:0] normal_wdata = ({64{state_is_lsu_idle}} & idle_data) | ({64{state_is_lsu_unalign}} & unalign_data);
 /*************************************************************Dcache***************************************************************/
-wire [63:0]     temp_mem_addr   ;
-wire [63:0]     mem_addr        ;
-wire [127:0]    mem_r_data      ;
-wire [127:0]    mem_w_data      ;
-wire            mem_r_req       ;
-wire            mem_w_req       ;
-wire            mem_req_ready_r ;
-wire [63:0]     temp_mem_data_r ;
+    wire         cpu_read_req  = load_en  & ~addr_is_device ;
+    wire         cpu_write_req = store_en & ~addr_is_device ; 
+    wire [63:0]  cache_mem_addr                             ;
+    wire [127:0] cache_mem_wdata                            ;
+    wire         cache_mem_r                                ;
+    wire         cache_mem_w                                ;
+    ysyx_22050598_cache u_ysyx_22050598_dcache (
+        .clk                    (clk            ),
+        .rst                    (rst            ),
+        .cpu_read_req           (cpu_read_req   ),
+        .cpu_write_req          (cpu_write_req  ),
+        .cpu_addr               (cache_addr     ),
+        .cpu_wmask              (wmask          ),
+        .cpu_write_data         (normal_wdata   ),
+        .cpu_data_ok            (cpu_data_ok    ),
+        .cpu_read_data          (rdata          ),
+        .mem_req_addr           (cache_mem_addr ),
+        .mem_w_data             (cache_mem_wdata),
+        .mem_req_r              (cache_mem_r    ), 
+        .mem_req_w              (cache_mem_w    ),   
+        .mem_r_data             (lsu_mem_rdata  ),
+        .mem_req_ready          (lsu_mem_ready  )
+    );
+    /****************************************************device fsm**************************************************************/
+    localparam DEVICE_IDLE  = 2'b00 ;
+    localparam DEVICE_WRITE = 2'b01 ;
+    localparam DEVICE_READ  = 2'b10 ;
+    localparam DEVICE_DONE  = 2'b11 ;
 
-wire            cpu_read_req  = load_en  & ~addr_is_device ;
-wire            cpu_write_req = store_en & ~addr_is_device ;      
-ysyx_22050598_cache u_ysyx_22050598_dcache (
-    .clk                    (clk            ),
-    .rst                    (rst            ),
-    .cpu_read_req           (cpu_read_req   ),
-    .cpu_write_req          (cpu_write_req  ),
-    .cpu_addr               (waddr          ),
-    .cpu_wmask              (wmask          ),
-    .cpu_write_data         (normal_wdata   ),
-    .cpu_data_ok            (cpu_data_ok    ),
-    .cpu_read_data          (rdata          ),
-    .mem_req_addr           (temp_mem_addr  ),
-    .mem_w_data             (mem_w_data     ),
-    .mem_req_r              (mem_r_req      ), 
-    .mem_req_w              (mem_w_req      ),   
-    .mem_r_data             (mem_r_data     ),
-    .mem_req_ready          (mem_req_ready_r)
-);
+    wire [1:0] device_state_r ;
+    wire       device_sta_is_idle  = ~device_state_r[1] & ~device_state_r[0];
+    wire       device_sta_is_write = ~device_state_r[1] &  device_state_r[0];
+    wire       device_sta_is_read  =  device_state_r[1] & ~device_state_r[0];
+    assign     device_sta_is_done  =  device_state_r[1] &  device_state_r[0];
 
-wire mem_ready = ~mem_req_ready_r;
-wire cache_mem_req = (mem_r_req | mem_w_req);
-ysyx_22050598_sirv_gnrl_dfflr #(1) dcache_mem_req_dfflr(cache_mem_req, mem_ready, mem_req_ready_r, clk, rst);
+    wire   device_sta_is_idle_exit_ena   = device_sta_is_idle  & lsu_ena & addr_is_device  ; 
+    wire   device_sta_is_write_exit_ena  = device_sta_is_write & lsu_mem_ready             ;
+    wire   device_sta_is_read_exit_ena   = device_sta_is_read  & lsu_mem_ready             ;
+    wire   device_sta_is_done_exit_ena   = device_sta_is_done  & ~lsu_stall                ;
 
-ysyx_22050598_sirv_gnrl_dfflr #(64) dcache_mem_dfflr(mem_r_req, temp_mem_data,temp_mem_data_r, clk, rst);
-assign mem_r_data = {temp_mem_data, temp_mem_data_r};
+    wire [1:0] device_sta_is_idle_nxt  = load_en    ? DEVICE_READ : DEVICE_WRITE           ; 
+    wire [1:0] device_sta_is_write_nxt = lsu_stall  ? DEVICE_DONE : DEVICE_IDLE            ;
+    wire [1:0] device_sta_is_read_nxt  = lsu_stall  ? DEVICE_DONE : DEVICE_IDLE            ;
+    wire [1:0] device_sta_is_done_nxt  = DEVICE_IDLE                                       ;
 
-assign mem_addr = mem_req_ready_r ? {temp_mem_addr[63:4],4'b1000} : {temp_mem_addr[63:4],4'b0000};
+    wire       device_ena = device_sta_is_idle_exit_ena  | 
+                            device_sta_is_write_exit_ena | 
+                            device_sta_is_read_exit_ena  |
+                            device_sta_is_done_exit_ena  ;
+    wire [1:0] device_nxt = ({2{device_sta_is_idle_exit_ena }} & device_sta_is_idle_nxt ) |
+                            ({2{device_sta_is_write_exit_ena}} & device_sta_is_write_nxt) |
+                            ({2{device_sta_is_read_exit_ena }} & device_sta_is_read_nxt ) |
+                            ({2{device_sta_is_done_exit_ena }} & device_sta_is_done_nxt ) ;
+    ysyx_22050598_sirv_gnrl_dfflr #(2) device_dfflr(device_ena, device_nxt, device_state_r, clk, rst); 
 
-wire [63:0] pmem_addr = ({64{~addr_is_device}} & mem_addr) | ({64{ addr_is_device}} & raddr) ;
-wire [63:0] mem_wdata = mem_req_ready_r ? mem_w_data[127:64] : mem_w_data[63:0] ;
-/************************************************************DPIC Part*************************************************************/   
-    import "DPI-C" function void pmem_read_test(input longint raddr, output longint rdata, input byte rlen, input longint addr ,input int inst);
-    import "DPI-C" function void pmem_write_test(input longint waddr, input longint wdata, input byte wlen, input byte wmask);
-    
-    always @(*) begin
-        if((mem_r_req | (load_en & addr_is_device)) == 1'b1)
-        pmem_read_test(pmem_addr, temp_mem_data, 8'd8, pc_ls, inst_ls);
-        else
-        pmem_read_test(64'h0000000080000000, temp_mem_data, 8'd8,64'd1,32'd0);
-    end
+    wire        device_load_data_ena = device_sta_is_read_exit_ena ;
+    wire [63:0] device_load_data_r ;
 
-    wire [7:0] wlen = ({8{size_b}} & 8'd1) |
-                      ({8{size_h}} & 8'd2) |
-                      ({8{size_w}} & 8'd4) |
-                      ({8{size_d}} & 8'd8) ;
-
+    ysyx_22050598_sirv_gnrl_dfflr #(64) device_load_data_dfflr(device_load_data_ena, lsu_mem_rdata[63:0], device_load_data_r, clk, rst);               
+/**********************************************************************************************************************************/
     wire [63:0] device_wdata = ({64{size_b}} & {8{ls_store_data[7:0]}})  |
                                ({64{size_h}} & {4{ls_store_data[15:0]}}) |
                                ({64{size_w}} & {2{ls_store_data[31:0]}}) |
                                ({64{size_d}} & ls_store_data)            ;
-    
-    assign wdata = ({64{~addr_is_device}} & mem_wdata) | ({64{addr_is_device}} & device_wdata);
 
-    always @(*) begin
-        if((mem_w_req | (store_en & addr_is_device)) == 1'b1)
-        pmem_write_test(pmem_addr, wdata, wlen, 8'hff);
-    end
+    assign lsu_mem_addr     = ({64{~addr_is_device}}  & cache_mem_addr ) | ({64{addr_is_device }} & cache_addr) ;
+    assign lsu_mem_wdata    = ({128{~addr_is_device}} & cache_mem_wdata) | ({128{addr_is_device}} & {2{device_wdata}}); 
+    assign lsu_mem_r_req    = (cache_mem_r | device_sta_is_read );
+    assign lsu_mem_w_req    = (cache_mem_w | device_sta_is_write); 
+    assign lsu_is_device    = device_sta_is_read | device_sta_is_write ;
+    assign lsu_wmask        = wmask ;
 
-    assign unalign_stall = ( lsu_unalign & state_is_lsu_idle & ~addr_is_device & lsu_ena) | 
-                           (~lsu_unalign & state_is_lsu_idle & ~addr_is_device & ~cpu_data_ok & lsu_ena) |//align stall
-                           (state_is_lsu_unalign & ~cpu_data_ok)                        ;//shake should change
+    assign unalign_stall = ( lsu_unalign & state_is_lsu_idle & lsu_ena            ) |//unalign stall 
+                           (~lsu_unalign & state_is_lsu_idle & ~exit_ena & lsu_ena) |//align stall
+                           ( state_is_lsu_unalign & ~exit_ena                     ) ;//shake should change
     assign load_data_o   = load_data ;
-    
- /*
-    import "DPI-C" function void pmem_read_test(input longint raddr, output longint rdata, input byte rlen);
-    import "DPI-C" function void pmem_write_test(input longint waddr, input longint wdata, input byte wlen, input byte wmask);
-    
-    wire [7:0] wlen = ({8{size_b}} & 8'd1) |
-                      ({8{size_h}} & 8'd2) |
-                      ({8{size_w}} & 8'd4) |
-                      ({8{size_d}} & 8'd8) ;
 
-    wire [63:0] device_wdata = ({64{size_b}} & {8{ls_store_data[7:0]}})  |
-                               ({64{size_h}} & {4{ls_store_data[15:0]}}) |
-                               ({64{size_w}} & {2{ls_store_data[31:0]}}) |
-                               ({64{size_d}} & ls_store_data)            ;
-    
-    assign wdata = ({64{~addr_is_device}} & normal_wdata) | ({64{addr_is_device}} & device_wdata);
-    always @(*) begin
-        if(load_en == 1'b1)
-        pmem_read_test(raddr, rdata, 8'd8);
-        else
-        pmem_read_test(64'h0000000080000000, rdata, 8'd8);
+    wire device_unalign = addr_is_device & lsu_unalign ;
+    import "DPI-C" function void deviceandunalign();
+    always @(posedge device_unalign) begin
+        deviceandunalign();    
     end
-
-    always @(*) begin
-        if(store_en == 1'b1)
-        pmem_write_test(waddr, wdata, wlen, wmask);
-    end
-
-    assign unalign_stall = (lsu_unalign & state_is_lsu_idle & ~addr_is_device) ;//shake should change
-    assign load_data_o   = load_data ;
-*/
 endmodule

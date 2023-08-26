@@ -363,7 +363,4 @@ module ysyx_22050598_cache (
         .A      (set_index_i        ), 
         .D      (cache_data         )
     );
-
 endmodule
-
-

@@ -6,7 +6,7 @@ all: default
 clean:
 	rm -rf obj_dir wave.vcd	
 sim:	
-	verilator --compiler gcc -Wno-fatal -y ./vsrc $(VSRC) $(CSRC) -j 16 -O3 --top-module npc --cc --exe -LDFLAGS -lreadline -LDFLAGS -lSDL2 -I/home/xg/ysyx-workbench/npc/csrc/ #-DVL_DEBUG--trace--prof-cfuncs--threads --threads-dpi 
+	verilator --compiler gcc -Wno-fatal -y ./vsrc $(VSRC) $(CSRC) -j -O3 --top-module npc --cc --exe -LDFLAGS -lreadline -LDFLAGS -lSDL2 -I/home/xg/ysyx-workbench/npc/csrc/ #-DVL_DEBUG--trace--prof-cfuncs--threads --threads-dpi 
 	make -C obj_dir -f Vnpc.mk Vnpc
 	#./obj_dir/Vnpc
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!

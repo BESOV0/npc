@@ -8,8 +8,6 @@
 #include "verilated_vcd_c.h"
 #endif
 
-
-
 vluint64_t main_time = 0;  //initial sim time
 Vnpc *top = new Vnpc("top");
 static char *img_file = NULL;
@@ -82,7 +80,7 @@ static int cmd_x(char *args){
 
      for (int i = 0; i < n; i++) 
      {
-         pmem_read(addr_temp + i * 4,mem);
+         pmem_read_test(addr_temp + i * 4,mem,8);
 	 printf("0x%016lx  ",addr_temp + i * 4);
 	 printf("0x%016llx\n",*mem);
      }
@@ -148,6 +146,13 @@ extern "C" void ebreak(long long int code){
 
 extern "C" void fencei(){
 	Log("%s",ANSI_FMT("FENCEI IN", ANSI_FG_GREEN));
+} 
+
+extern "C" void confilct_read(){
+	Log("%s",ANSI_FMT("Confilct READ", ANSI_FG_GREEN));
+}
+extern "C" void deviceandunalign(){
+	Log("%s",ANSI_FMT("IF SEE THIS AND PROGRAM DIES CHECK LSU ALIGN FOR DEVICE", ANSI_FG_GREEN));
 } 
 
 uint64_t *cpu_gpr = NULL;
@@ -244,12 +249,25 @@ void pmem_write(long long waddr, long long wdata, char wmask) {
 	long long temp_data = (wdata & mask) | (rdata & ~mask);
 	host_write(guest_to_host(waddr), 8, temp_data);
 }
+void vmem_write(void *waddr,uint64_t wdata, char wmask) {
+	uint64_t rdata;
+	rdata = host_read(waddr,8);
+	long long mask = 0 ;
+	long long temp = 0x00000000000000ff;
+	for(int i = 0 ; i < 8 ; i++ ){
+		if(wmask & (0x01 << i)){
+			mask |= (temp << (i * 8));
+		}
+	}
+	long long temp_data = (wdata & mask) | (rdata & ~mask);
+	host_write(waddr, 8, temp_data);
+}
 /***********************************test****************************************/
 uint64_t temp_mtime = 0;
-extern "C" void pmem_read_test(long long raddr,long long *rdata,char len,long long addr, int inst){
+extern "C" void pmem_read_test(long long raddr,long long *rdata,char len){
 	switch(raddr){
-	case RTC_ADDR + 4 : {temp_mtime = get_time(); *rdata = (temp_mtime >> 32);return;}
-	case RTC_ADDR :     {*rdata = (temp_mtime & 0x00000000ffffffff);return;}
+	case RTC_ADDR + 8 : {temp_mtime = get_time(); *rdata = (temp_mtime >> 32);return;}
+	case RTC_ADDR :     {*rdata = temp_mtime;return;}
 	case KBD_ADDR :     {*rdata = key_dequeue();return;}
 	case VGACTL_ADDR :  {*rdata = vgactl_port_base[0];return;}
 	default:            { 	
@@ -270,26 +288,26 @@ extern "C" void pmem_read_test(long long raddr,long long *rdata,char len,long lo
 }
 
 uint32_t size_vga;
-extern "C" void pmem_write_test(long long waddr, long long wdata,char len, char wmask) {
+uint32_t vga_flag = 0 ;
+extern "C" void pmem_write_test(long long waddr, long long wdata,char wmask) {
 	long long offset_min = waddr - FB_ADDR;
 	long long offset_max = waddr - size_vga - FB_ADDR;
 	bool ADDR_NOT_IN_FB = (offset_min < 0) || (offset_max > 0);
 	if(ADDR_NOT_IN_FB){
 		switch(waddr){
 		case SERIAL_PORT :     {putchar((char)wdata);return;}
-		case VGACTL_ADDR + 4 : {vgactl_port_base[1] = (uint32_t)wdata;return;}
+		case VGACTL_ADDR + 8 : {vgactl_port_base[1] = (uint32_t)wdata;return;}
 		default:               { 
 					 assert(waddr - 0x80000000 >= 0);
 					 assert(waddr - 0x80000000 < pmem_size);
-					 //printf("Cache In\n");
 					 pmem_write(waddr,wdata,wmask);
-					 //host_write(guest_to_host(waddr), (int)len, wdata);
 					 return;
 					}
 		}
 	}
 	else{
-	host_write((uint8_t*)vmem + offset_min, (int)len, wdata);
+	vmem_write((uint8_t*)vmem + offset_min,wdata,wmask);
+	//host_write((uint8_t*)vmem + offset_min, (int)len, wdata);
 	return;
 	}	
 }
