@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <assert.h>
 #include <string.h>
+#include <sdlmacro.h>
 
 #define keyname(k) #k,
 
@@ -16,7 +17,7 @@ static const char *keyname[] = {
 static uint8_t keystate[NR_KEY];
 
 int SDL_PushEvent(SDL_Event *ev) {
-	//assert(0);
+	assert(0);
   return 0;
 }
 
@@ -32,10 +33,10 @@ int SDL_PollEvent(SDL_Event *ev) {
     		}
     		*/
     		//printf("SDL_PollEvent good\n");
-    		printf("%s",buf); 
+    		//Log("%s",buf); 
     	    		for(i = 0; i < NR_KEY;i++){
     			if(strncmp(keyname[i] , buf + 3, KEY_MAX(strlen(buf) - 4,strlen(keyname[i]))) == 0){
-    				printf("keyname is %s\n",keyname[i]);
+    				//printf("keyname is %s\n",keyname[i]);
 				ev->key.keysym.sym = i;
 			 	break;
 			}
@@ -61,7 +62,7 @@ int SDL_WaitEvent(SDL_Event *event) {
 	int i = 0;
     	while(NDL_PollEvent(buf, sizeof(buf)) == 0); 
     		
-    		printf("%s",buf); 
+    		//Log("%s",buf); 
     		//printf("SDL_WaitEvent good\n");
     		for(i = 0; i < NR_KEY;i++){
     			if(strncmp(keyname[i] , buf + 3, KEY_MAX(strlen(buf) - 4,strlen(keyname[i]))) == 0){

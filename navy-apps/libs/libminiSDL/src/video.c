@@ -89,6 +89,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 		}
 	}
 	else if(dst->format->BitsPerPixel == 8){
+	/*
 		uint8_t k = 0;
 		for(k = 0; k < dst->format->palette->ncolors; k++){
 			if((dst->format->palette->colors[k].b == color & 0xff) &&  
@@ -97,10 +98,11 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 			   (dst->format->palette->colors[k].a == (color >> 24) & 0xff))  
 				break;
 		}
+	*/
 		uint8_t *pixels = (uint8_t *)dst->pixels;
 		for(int i = y; i < y + h;i++){
 			for(int j = x; j < x + w ; j++){
-				pixels[i * dst->w + j] = k;
+				pixels[i * dst->w + j] = (uint8_t)color;
 			}
 		}
 	}
@@ -109,6 +111,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 		//return;	
 	}	
 }
+
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
 	

@@ -41,12 +41,12 @@ module ysyx_22050598_exu_alu (
     wire [`ysyx_22050598_ALU_ADDER_WIDTH-1:0] add_sub_op_b = {`ysyx_22050598_ALU_ADDER_WIDTH{add_or_sub}} & adder_op2;
     wire [`ysyx_22050598_ALU_ADDER_WIDTH-1:0] add_sub_in_a = add_sub_op_a;
     wire [`ysyx_22050598_ALU_ADDER_WIDTH-1:0] add_sub_in_b = ex_alu_op_type[8] ? (~add_sub_op_b) : add_sub_op_b;
-    wire [`ysyx_22050598_ALU_ADDER_WIDTH-1:0] sum_sub_data =  add_sub_in_a + add_sub_in_b +  add_sub_cin;
+    wire [`ysyx_22050598_ALU_ADDER_WIDTH-1:0] sum_sub_data =  add_sub_in_a + add_sub_in_b + add_sub_cin;
    
     wire [63:0] sum_sub_w_result = {{33{sum_sub_data[31]}},sum_sub_data[30:0]};
     wire [63:0] sum_sub_result = (add_or_sub & ex_inst_is_rv64) ? sum_sub_w_result : sum_sub_data[`ysyx_22050598_ALU_XLEN - 1 : 0] ;          
     /**************************************************Multdiv Part************************************************/
-
+    
     wire mul_valid = ex_alu_op_type[7];
     wire div_valid = ex_alu_op_type[6] | ex_alu_op_type[5];
     wire muldivw = ex_inst_is_rv64;
@@ -82,7 +82,9 @@ module ysyx_22050598_exu_alu (
                              ({64{ex_inst_mul_bus[0]}} & {{32{result_lo[31]}},result_lo[31:0]})  ;
     wire [63:0] div_result = ex_inst_is_rv64 ? {{32{quotient[31] }},quotient[31:0] } : quotient  ;
     wire [63:0] mod_result = ex_inst_is_rv64 ? {{32{remainder[31]}},remainder[31:0]} : remainder ;
+    
     /*
+    assign muldivout_valid = 1'b1 ;
     wire [31:0] inst_rv64_a_op = ex_alu_op_a[31:0] & {32{ex_inst_is_rv64}};//for rv64 instruction
     wire [31:0] inst_rv64_b_op = ex_alu_op_b[31:0] & {32{ex_inst_is_rv64}};//for rv64 instruction
     wire [63:0] inst_rv32_a_op = ex_alu_op_a & {64{~ex_inst_is_rv64}};//for rv32 instruction
@@ -121,6 +123,7 @@ module ysyx_22050598_exu_alu (
                            | ({64{~ex_inst_divrem_bus & ~ex_inst_is_rv64}} & divu_res)
                            | ({64{~ex_inst_divrem_bus & ex_inst_is_rv64 }} & divwu_res)
                            | ({64{ex_inst_divrem_bus  & ex_inst_is_rv64 }} & divw_res);
+    
     //************************Mod Part*************************
     wire [63:0] mod_op_a = {64{ex_alu_op_type[5]}} & inst_rv32_a_op;//for inst remu rem
     wire [63:0] mod_op_b = {64{ex_alu_op_type[5]}} & inst_rv32_b_op;//for inst remu rem
@@ -139,6 +142,7 @@ module ysyx_22050598_exu_alu (
                            | ({64{~ex_inst_divrem_bus & ex_inst_is_rv64 }} & remwu_mod)
                            | ({64{ex_inst_divrem_bus  & ex_inst_is_rv64 }} & remw_mod);
     */
+    
     /*******************************************Shift Part**********************************************************/
     wire        alu_op_is_shift   = ex_alu_op_type[4]   | ex_alu_op_type[3]                 ;
     wire [63:0] temp_shift_op_a   = ex_alu_op_a         & {64{alu_op_is_shift}}             ;

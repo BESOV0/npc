@@ -12,8 +12,7 @@ module ysyx_22050598_sirv_gnrl_dfflr #(
 
 reg [DW-1:0] qout_r;
 
-always @(posedge clk)
-begin : DFFLR_PROC
+always @(posedge clk) begin
   if (rst_n == 1'b0)
     qout_r <= {DW{1'b0}};
   else if (lden == 1'b1)

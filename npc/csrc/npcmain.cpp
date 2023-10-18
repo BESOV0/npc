@@ -11,7 +11,7 @@
 vluint64_t main_time = 0;  //initial sim time
 Vnpc *top = new Vnpc("top");
 static char *img_file = NULL;
-static char *log_file = NULL;
+static char *diff_so_file = NULL;
 long img_size;
 char NPC_STOP = 0; 
  
@@ -134,7 +134,7 @@ static struct {
   /* TODO: Add more commands */
 
 };
-//////////////////////////////////////DPI-C Part/////////////////////////////
+//############################################DPI-C Part#####################################################//
 char ebreak_flag = 0;
 extern "C" void ebreak(long long int code){
 	ebreak_flag = 1;
@@ -142,50 +142,7 @@ extern "C" void ebreak(long long int code){
 	Log("%s",ANSI_FMT("HIT GODD TRAP", ANSI_FG_GREEN));
 	else
 	Log("%s",ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED));
-} 
-
-extern "C" void fencei(){
-	Log("%s",ANSI_FMT("FENCEI IN", ANSI_FG_GREEN));
-} 
-
-extern "C" void confilct_read(){
-	Log("%s",ANSI_FMT("Confilct READ", ANSI_FG_GREEN));
-}
-extern "C" void deviceandunalign(){
-	Log("%s",ANSI_FMT("IF SEE THIS AND PROGRAM DIES CHECK LSU ALIGN FOR DEVICE", ANSI_FG_GREEN));
-} 
-
-uint64_t *cpu_gpr = NULL;
-extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
-  cpu_gpr = (uint64_t *)(((VerilatedDpiOpenVar*)r)->datap());
-}
-
-const char *regs[] = {
-  "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
-  "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
-  "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
-  "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
-};
-void dump_gpr(){
-  int i;
-  for (i = 0; i < 32; i++) {
-    if ((i+1)%2!=0)
-    printf("%s is 0x%016lx    ",regs[i], cpu_gpr[i]);
-    else
-    printf("%s is 0x%016lx\n",regs[i], cpu_gpr[i]);
-  }
-}
-
-unsigned long int isa_reg_str2val(const char *s) {
-	for (int i = 0;i<32;i++){	  
-	   if (strcmp("pc",s) == 0)
-	      return top->test_wb_inst; 
-	   else if(strcmp(regs[i],s) == 0)
-	      return cpu_gpr[i];
-	}
-	return 0;
-}
-
+}  
 /*****************************initial instrcution Part****************************/
  //00800e13          	addi	t3,x0,8
  //ffce0e93          	addi	t4,t3,-4
@@ -262,7 +219,7 @@ void vmem_write(void *waddr,uint64_t wdata, char wmask) {
 	long long temp_data = (wdata & mask) | (rdata & ~mask);
 	host_write(waddr, 8, temp_data);
 }
-/***********************************test****************************************/
+
 uint64_t temp_mtime = 0;
 extern "C" void pmem_read_test(long long raddr,long long *rdata,char len){
 	switch(raddr){
@@ -335,14 +292,14 @@ static long load_img() {
 }
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
-    {"log"      , required_argument, NULL, 'l'},
-    {0          , 0                , NULL,  0 },
+    {"diff" , required_argument, NULL, 'd'},
+    {0      , 0                , NULL,  0 },
     };
   int o;
-  while ( (o = getopt_long(argc, argv, "-l:d:p:", table, NULL)) != -1) {
+  while ( (o = getopt_long(argc, argv, "-d:", table, NULL)) != -1) {
     switch (o) {
-      case 'l': log_file = optarg; break;
-      case 1:   img_file = optarg;return 0;
+      case 'd': diff_so_file = optarg; break;
+      case 1: img_file = optarg; return 0;
       default:
         Log("\t-f,--ftrace=FILE     read  elf file");
         return 0;
@@ -372,6 +329,7 @@ unsigned char startover_flag = 0 ;
 uint64_t g_timer = 0;
 uint64_t inst_num = 0;
 uint64_t cycle_num = 0;
+uint64_t dut_pc = 0 ;
 void simmain(unsigned long int exectime){
     if (startover_flag == 1){
     Log("This program is finished please lanch again to run other programs");
@@ -381,9 +339,7 @@ void simmain(unsigned long int exectime){
     if (NPC_STOP == 1){
     NPC_STOP = 0; 
     }
-    
-    //Verilated::commandArgs(argc, argv); 
-    //Vnpc *top = new Vnpc("top"); //调用VAccumulator.h里面的IO struct
+
     #ifdef VCD_WAVE
     Verilated::traceEverOn(true); 
     VerilatedVcdC* tfp = new VerilatedVcdC;
@@ -397,31 +353,46 @@ void simmain(unsigned long int exectime){
     uint64_t timer_start = get_time();
     while (sc_time_stamp() < temp && (ebreak_flag == 0) && (NPC_STOP == 0)) 
     {		
-    		//pmem_read(top->pc_now,tempinst);
-                //top->inst = *(uint32_t *)tempinst;  
-                
+    		single_cycle();
+    		/*
                 if (exectime != -1){
                 Log("if_pc is 0x%lx instrcution is 0x%08x",top->test_if_pc,top->test_if_inst);                    
                 Log("id_pc is 0x%lx instrcution is 0x%08x",top->test_id_pc,top->test_id_inst);
                 Log("ex_pc is 0x%lx instrcution is 0x%08x",top->test_ex_pc,top->test_ex_inst);            
         	Log("ls_pc is 0x%lx instrcution is 0x%08x",top->test_ls_pc,top->test_ls_inst);         	
-        	Log("wb_pc is 0x%lx instrcution is 0x%08x",top->test_wb_pc,top->test_wb_inst);                       
+        	Log("wb_pc is 0x%lx instrcution is 0x%08x",top->test_wb_pc,top->test_wb_inst);    
+        	Log("npc_stall is %d",top->npc_stall);                
   		}
-  		
+  		*/
         	if (!watchpoints_expr()) {
                 NPC_STOP = 1;
                 temp = main_time + 1;
                 }  
-                if((top->test_wb_inst != 0x00000013) && (top->npc_stall == 0))
-                inst_num++;
+    //5 stage core inst start with 0x00000000 skip it and bubble is 0x00000013 skip it 
+		bool skip_wb_inst_req  = (top->test_wb_inst != 0x00000013) && (top->test_wb_inst != 0);
+		//stall posedge is executed one inst but at the first time cpu execute inst 0x00000000 so skip it
+		//when npc_stall is hign cpu is stalled so skip it
+		//the reason why npc_stall and posedge_stall's logic is or is why posedge is coming npc_stall is 1 but this cycle exexcutes inst so the logic is or
+		//when stall negedge cpu don't execute inst but other condition is satisfied so skip it
+		bool skip_wb_stall_req = ((top->posedge_stall == 1) && top->test_wb_pc != 0x80000000) || (top->npc_stall == 0) && (top->negedge_stall == 0);
+                if(skip_wb_inst_req && skip_wb_stall_req){
+                	inst_num++;
+                #ifdef DIFFTEST
+                difftest_one_step();
+                //Log("nemu exec once at cycle %ld",cycle_num);  
+                dut_pc = top->test_wb_pc ;
+                if(!difftest_check())
+                	ebreak_flag = 1 ;
+                #endif
+                }
                 cycle_num++;
-                //top->eval();
                 #ifdef VCD_WAVE
-		tfp->dump(main_time); //dump wave
-		#endif
-        	main_time++;
-        	single_cycle(); 
-        	device_update(&ebreak_flag); 
+		            tfp->dump(main_time); //dump wave
+		            #endif
+        	      main_time++;
+        	      vga_update_screen();
+        	      if(inst_num % 600 == 0)
+        	      keyboard_update(&ebreak_flag);         	
     }
     uint64_t timer_end = get_time();
     g_timer += timer_end - timer_start;
@@ -433,14 +404,14 @@ void simmain(unsigned long int exectime){
     delete top;
     startover_flag = 1 ;
     free_vga();
-    Log("inst num is %ld , time is %ld us",inst_num, g_timer);
+    Log("cycle num is %ld,inst num is %ld,time is %ld us",cycle_num, inst_num, g_timer);
     Log("simulation frequency is %ld inst/s",(inst_num *1000000)/ g_timer);
     Log("IPC is %lf",(double)inst_num/(double)cycle_num);
     } 
     
 } 
 
-/*****************************************main******************************************/ 
+/******************************************************main***********************************************************/ 
 
 void init_sdb() {
   /* Compile the regular expressions. */
@@ -458,10 +429,11 @@ int main(int argc, char **argv)
     size_vga = screen_size();
     parse_args(argc, argv);
     img_size = load_img();//pass arg
-    assert(img_size < pmem_size);
-    
     reset(5);
-    
+    #ifdef DIFFTEST
+    init_difftest(diff_so_file, img_size);
+    #endif
+    assert(img_size < pmem_size);
     for (char *str; (str = rl_gets()) != NULL; ) {
     		char *str_end = str + strlen(str);
     			/* extract the first token as the command */

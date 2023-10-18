@@ -83,6 +83,8 @@ VL_ATTR_COLD void Vnpc___024root___ctor_var_reset(Vnpc___024root* vlSelf) {
     vlSelf->test_wb_pc = VL_RAND_RESET_Q(64);
     vlSelf->test_wb_inst = VL_RAND_RESET_I(32);
     vlSelf->npc_stall = VL_RAND_RESET_I(1);
+    vlSelf->negedge_stall = VL_RAND_RESET_I(1);
+    vlSelf->posedge_stall = VL_RAND_RESET_I(1);
     vlSelf->clk = VL_RAND_RESET_I(1);
     vlSelf->rst = VL_RAND_RESET_I(1);
     vlSelf->npc__DOT__AXI_AWADDR = VL_RAND_RESET_Q(64);
@@ -2565,6 +2567,7 @@ VL_ATTR_COLD void Vnpc___024root___ctor_var_reset(Vnpc___024root* vlSelf) {
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__ysyx_22050598_LS_WB__DOT__ls_wb_ebreak_dfflr__DOT__qout_r = VL_RAND_RESET_I(1);
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__ysyx_22050598_LS_WB__DOT__ls_wb_inst_dfflr__DOT__qout_r = VL_RAND_RESET_I(32);
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__ysyx_22050598_LS_WB__DOT__ls_wb_pc_dfflr__DOT__qout_r = VL_RAND_RESET_Q(64);
+    vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__stall_dfflr__DOT__qout_r = VL_RAND_RESET_I(1);
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_w_posedge_dfflr__DOT__qout_r = VL_RAND_RESET_I(1);
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_awvalid_dfflr__DOT__qout_r = VL_RAND_RESET_I(1);
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_cnt_dfflr__DOT__qout_r = VL_RAND_RESET_I(1);

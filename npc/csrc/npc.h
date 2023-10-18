@@ -15,6 +15,7 @@
 #include <readline/history.h>
 #include <sys/time.h>
 #include <SDL2/SDL.h>
+#include <dlfcn.h>
 
 /************************pmem**********************/
 #define pmem_size 0x10000000
@@ -84,11 +85,25 @@ void init_wp_pool();
 void init_regex();
 void simmain(unsigned long int exectime);
 void dump_gpr();
+uint8_t* guest_to_host(long long paddr);
+/************************difftest*********************/
+//#define DIFFTEST 1
+#ifdef DIFFTEST
+typedef struct {
+  uint64_t gpr[32];
+  uint64_t pc;
+} reg_struct;
+void difftest_one_step();
+bool difftest_check();
+bool checkregs(reg_struct *ref, reg_struct *dut);
+reg_struct get_dut_state(uint64_t *dut_reg,uint64_t pc);
+void init_difftest(char *ref_so_file, long img_size);
+#endif
 /************************timer**********************/
 extern uint64_t boot_time;
 uint64_t get_time();
 /**********************keyboard********************/
-void device_update(char *ebreak_flag);
+void keyboard_update(char *ebreak_flag);
 void key_enqueue(uint32_t am_scancode);
 uint32_t key_dequeue();
 void send_key(uint8_t scancode, bool is_keydown);

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
+//#if defined(__NATIVE_USE_KLIB__)
 
 static unsigned long m_pow_n(int m,int n){
 	unsigned long sum = 1;

@@ -38,16 +38,20 @@ VM_USER_CFLAGS = \
 
 # User LDLIBS (from -LDFLAGS on Verilator command line)
 VM_USER_LDLIBS = \
+	-ldl \
 	-lreadline \
 	-lSDL2 \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
 	device \
+	difftest \
+	dpic \
 	expr \
 	keyboard \
 	log \
 	npcmain \
+	regfile \
 	timer \
 	vga \
 	watchpoint \
@@ -68,6 +72,10 @@ VPATH += $(VM_USER_DIR)
 
 device.o: ./csrc/device.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+difftest.o: ./csrc/difftest.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+dpic.o: ./csrc/dpic.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 expr.o: ./csrc/expr.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 keyboard.o: ./csrc/keyboard.cpp
@@ -75,6 +83,8 @@ keyboard.o: ./csrc/keyboard.cpp
 log.o: ./csrc/log.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 npcmain.o: ./csrc/npcmain.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+regfile.o: ./csrc/regfile.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 timer.o: ./csrc/timer.cpp
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<

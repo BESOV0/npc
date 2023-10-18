@@ -12,6 +12,8 @@ module npc(
     output [63:0]   test_wb_pc       ,
     output [31:0]   test_wb_inst     ,
     output          npc_stall        , 
+	output          negedge_stall    ,
+	output    		posedge_stall    ,
     `endif
     input            clk             ,
     input            rst             
@@ -68,6 +70,8 @@ ysyx_22050598_cpu u_ysyx_22050598_cpu(
     .test_wb_pc     (test_wb_pc     ),
     .test_wb_inst   (test_wb_inst   ),
     .npc_stall      (npc_stall      ), 
+	.negedge_stall  (negedge_stall	),
+	.posedge_stall	(posedge_stall	),
     `endif
     .clk            (clk            ),
     .rst            (rst            ),

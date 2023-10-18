@@ -1,7 +1,6 @@
 #include "npc.h"
 
-void device_update(char *ebreak_flag) {
-  vga_update_screen();
+void keyboard_update(char *ebreak_flag) {
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     switch (event.type) {

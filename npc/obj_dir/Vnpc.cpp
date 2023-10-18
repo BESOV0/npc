@@ -13,6 +13,8 @@ Vnpc::Vnpc(VerilatedContext* _vcontextp__, const char* _vcname__)
     , vlSymsp{new Vnpc__Syms(contextp(), _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , npc_stall{vlSymsp->TOP.npc_stall}
+    , negedge_stall{vlSymsp->TOP.negedge_stall}
+    , posedge_stall{vlSymsp->TOP.posedge_stall}
     , rst{vlSymsp->TOP.rst}
     , test_if_inst{vlSymsp->TOP.test_if_inst}
     , test_id_inst{vlSymsp->TOP.test_id_inst}

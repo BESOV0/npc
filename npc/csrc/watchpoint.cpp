@@ -1,4 +1,3 @@
-
 #include "npc.h"
 
 #define NR_WP 32

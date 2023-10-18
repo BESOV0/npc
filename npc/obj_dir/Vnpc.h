@@ -27,6 +27,8 @@ class Vnpc VL_NOT_FINAL : public VerilatedModel {
     // propagate new values into/out from the Verilated model.
     VL_IN8(&clk,0,0);
     VL_OUT8(&npc_stall,0,0);
+    VL_OUT8(&negedge_stall,0,0);
+    VL_OUT8(&posedge_stall,0,0);
     VL_IN8(&rst,0,0);
     VL_OUT(&test_if_inst,31,0);
     VL_OUT(&test_id_inst,31,0);

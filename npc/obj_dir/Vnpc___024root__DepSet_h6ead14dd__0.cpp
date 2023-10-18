@@ -5416,6 +5416,8 @@ VL_INLINE_OPT void Vnpc___024root___nba_sequent__TOP__2(Vnpc___024root* vlSelf) 
                 = (1ULL | (0x7ffffffffffffeULL & (vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__u_ysyx_22050598_dcache__DOT__cpu_addr_dfflr__DOT__qout_r 
                                                   >> 9U)));
         }
+        vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__stall_dfflr__DOT__qout_r 
+            = vlSelf->npc_stall;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_r_lsu_posedge_dfflr__DOT__qout_r 
             = vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__lsu_mem_r_req;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_cposedge_dfflr__DOT__qout_r 
@@ -5858,8 +5860,8 @@ VL_INLINE_OPT void Vnpc___024root___nba_sequent__TOP__2(Vnpc___024root* vlSelf) 
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__u_ysyx_22050598_dcache__DOT__way0_cache_dirty__DOT__cache_tag_vaild_ram__BRA__2__KET____DOT__tag_vaild_ram__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__u_ysyx_22050598_dcache__DOT__way0_cache_dirty__DOT__cache_tag_vaild_ram__BRA__1__KET____DOT__tag_vaild_ram__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__u_ysyx_22050598_dcache__DOT__way0_cache_dirty__DOT__cache_tag_vaild_ram__BRA__0__KET____DOT__tag_vaild_ram__DOT__qout_r = 0U;
-        vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ifu__DOT__u_ysyx_22050598_icache__DOT__set_offset_dfflr__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_EX_LS__DOT__ex_ls_store_en_dfflr__DOT__qout_r = 0U;
+        vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ifu__DOT__u_ysyx_22050598_icache__DOT__set_offset_dfflr__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ifu__DOT__u_ysyx_22050598_icache__DOT__way3_cache_dirty__DOT__cache_tag_vaild_ram__BRA__63__KET____DOT__tag_vaild_ram__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ifu__DOT__u_ysyx_22050598_icache__DOT__way3_cache_dirty__DOT__cache_tag_vaild_ram__BRA__62__KET____DOT__tag_vaild_ram__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ifu__DOT__u_ysyx_22050598_icache__DOT__way3_cache_dirty__DOT__cache_tag_vaild_ram__BRA__61__KET____DOT__tag_vaild_ram__DOT__qout_r = 0U;
@@ -6254,6 +6256,7 @@ VL_INLINE_OPT void Vnpc___024root___nba_sequent__TOP__2(Vnpc___024root* vlSelf) 
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__u_ysyx_22050598_dcache__DOT__way2_cache_tag_valid__DOT__cache_tag_vaild_ram__BRA__59__KET____DOT__tag_vaild_ram__DOT__qout_r = 0ULL;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__u_ysyx_22050598_dcache__DOT__way2_cache_tag_valid__DOT__cache_tag_vaild_ram__BRA__58__KET____DOT__tag_vaild_ram__DOT__qout_r = 0ULL;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__u_ysyx_22050598_dcache__DOT__way2_cache_tag_valid__DOT__cache_tag_vaild_ram__BRA__57__KET____DOT__tag_vaild_ram__DOT__qout_r = 0ULL;
+        vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__stall_dfflr__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_r_lsu_posedge_dfflr__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_cposedge_dfflr__DOT__qout_r = 0U;
         vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__m_axi_r_ifu_posedge_dfflr__DOT__qout_r = 0U;

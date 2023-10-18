@@ -20,7 +20,7 @@ void hello_fun(void *arg) {
 }
 
 void init_proc() {
-  const char *filename = "/bin/nslider";//"/bin/bmp-test";"/bin/event-test";"/bin/nslider";nterm
+  const char *filename = "/bin/pal";//"/bin/bmp-test";"/bin/event-test";"/bin/nslider";nterm
   switch_boot_pcb();
   
   Log("Initializing processes...");

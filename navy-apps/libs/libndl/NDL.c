@@ -73,7 +73,7 @@ void NDL_OpenCanvas(int *w, int *h) {
 }
 
 
-#define Middle
+//#define Middle
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   	int fd = open("/dev/fb",O_RDWR);
   	//assert(fd != -1);

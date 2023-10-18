@@ -33,10 +33,10 @@ module ysyx_22050598_exu_csr (
     wire [`ysyx_22050598_CSR_XLEN-1:0] read_csr_data  ;
     wire [`ysyx_22050598_CSR_XLEN-1:0] write_csr_data ;
 
-    wire csr_imm_is_0x300 = (csr_imm_i[11:0] == 12'h300);
-    wire csr_imm_is_0x305 = (csr_imm_i[11:0] == 12'h305);
-    wire csr_imm_is_0x341 = (csr_imm_i[11:0] == 12'h341);
-    wire csr_imm_is_0x342 = (csr_imm_i[11:0] == 12'h342);
+    wire csr_imm_is_0x300 = ~(|(csr_imm_i[11:0] ^ 12'h300));
+    wire csr_imm_is_0x305 = ~(|(csr_imm_i[11:0] ^ 12'h305));
+    wire csr_imm_is_0x341 = ~(|(csr_imm_i[11:0] ^ 12'h341));
+    wire csr_imm_is_0x342 = ~(|(csr_imm_i[11:0] ^ 12'h342));
 
     wire csr_mstatus_ena = (csr_imm_is_0x300 & csr_ena) ;
     wire csr_mtvec_ena   = (csr_imm_is_0x305 & csr_ena) ;
@@ -76,7 +76,7 @@ module ysyx_22050598_exu_csr (
 
     //assign ecall_mstatus_data = csr_mstatus_data_r;
 
-    assign csr_mstatus_data = (write_csr_data     & {64{csr_mstatus_ena  }}) ; 
+    assign csr_mstatus_data = (write_csr_data & {64{csr_mstatus_ena   }}) ; 
                               //(ecall_mstatus_data & {64{ex_inst_is_mret_i}}) ; 
 
     assign csr_mtvec_data   = (write_csr_data & {64{csr_mtvec_ena     }}) ;

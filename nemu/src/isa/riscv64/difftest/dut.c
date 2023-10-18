@@ -25,8 +25,7 @@ const char *tempregs[] = {
 };
 
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
-	//Log("ref_pc is  %lx",ref_r->pc);
-	//Log("dut_pc is  %lx",pc);
+	//Log("ref_pc is  %lx dut_pc is  %lx",ref_r->pc,pc);
 	for(int i = 0;i<32;i++){
 		if(cpu.gpr[i] != ref_r->gpr[i]){
 			Log("%s is wrong ref is 0x%016lx, dut pc is 0x%016lx",tempregs[i],ref_r->gpr[i],cpu.gpr[i]);

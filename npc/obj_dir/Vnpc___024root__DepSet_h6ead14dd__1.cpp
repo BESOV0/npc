@@ -369,16 +369,16 @@ VL_INLINE_OPT void Vnpc___024root___nba_sequent__TOP__4(Vnpc___024root* vlSelf) 
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_regfile__DOT__rf_r[1U] 
         = vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_regfile__DOT__regfile__BRA__1__KET____DOT__genblk1__DOT__regfile_dfflr__DOT__qout_r;
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_exu_csr__DOT__csr_mepc_ena 
-        = ((0x341U == (0xfffU & (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r))) 
+        = ((~ (IData)((0U != (0xfffU & (0x341U ^ (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r)))))) 
            & (0U != (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__id_ex_csr_bus_dfflr__DOT__qout_r)));
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_exu_csr__DOT__csr_mcause_ena 
-        = ((0x342U == (0xfffU & (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r))) 
+        = ((~ (IData)((0U != (0xfffU & (0x342U ^ (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r)))))) 
            & (0U != (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__id_ex_csr_bus_dfflr__DOT__qout_r)));
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_exu_csr__DOT__mstatus_r_ena 
-        = ((0x300U == (0xfffU & (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r))) 
+        = ((~ (IData)((0U != (0xfffU & (0x300U ^ (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r)))))) 
            & (0U != (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__id_ex_csr_bus_dfflr__DOT__qout_r)));
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_exu_csr__DOT__mtvec_r_ena 
-        = ((0x305U == (0xfffU & (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r))) 
+        = ((~ (IData)((0U != (0xfffU & (0x305U ^ (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__alu_op_b_dfflr__DOT__qout_r)))))) 
            & (0U != (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__id_ex_csr_bus_dfflr__DOT__qout_r)));
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__core_lsu_is_device 
         = ((IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_lsu__DOT__device_sta_is_read) 
@@ -7500,6 +7500,10 @@ VL_INLINE_OPT void Vnpc___024root___nba_sequent__TOP__6(Vnpc___024root* vlSelf) 
         = (1U & ((~ ((IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__pipeline_flush) 
                      >> 2U)) & ((IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_ID_EX__DOT__id_ex_op_type_dfflr__DOT__qout_r) 
                                 >> 7U)));
+    vlSelf->negedge_stall = ((~ (IData)(vlSelf->npc_stall)) 
+                             & (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__stall_dfflr__DOT__qout_r));
+    vlSelf->posedge_stall = ((~ (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__stall_dfflr__DOT__qout_r)) 
+                             & (IData)(vlSelf->npc_stall));
     vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_exu_alu__DOT__u_ysyx_22050598___05Fmuldiv__DOT__div_start_ena 
         = ((IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__muldiv_ready) 
            & (IData)(vlSelf->npc__DOT__u_ysyx_22050598_cpu__DOT__u_ysyx_22050598_core__DOT__u_ysyx_22050598_exu_alu__DOT__u_ysyx_22050598___05Fmuldiv__DOT__div_is_valid));

@@ -12,6 +12,8 @@ module ysyx_22050598_core(
         output [63:0]   test_wb_pc          ,
         output [31:0]   test_wb_inst        ,
         output          npc_stall           ,
+        output          negedge_stall       ,
+        output          posedge_stall       ,
 `endif
         input           clk                 ,
         input           rst                 ,
@@ -490,16 +492,23 @@ module ysyx_22050598_core(
                                 );
 
 `ifdef ysyx_22050598_Test
-    assign   test_if_pc     = if_id_pc   ;
-    assign   test_if_inst   = if_id_inst ;
-    assign   test_id_pc     = id_pc      ;
-    assign   test_id_inst   = id_inst    ;
-    assign   test_ex_pc     = ex_pc      ;
-    assign   test_ex_inst   = ex_inst    ;
-    assign   test_ls_pc     = ls_pc      ;
-    assign   test_ls_inst   = ls_inst    ;
-    assign   test_wb_pc     = wb_pc      ;
-    assign   test_wb_inst   = wb_inst    ;
-    assign   npc_stall      = &pipeline_stall ;
+    wire     temp_npc_stall = &pipeline_stall ;
+    wire     npc_stall_r                      ;
+    wire     stall_negedge  = npc_stall_r  & ~temp_npc_stall ;
+    wire     stall_posedge  = ~npc_stall_r & temp_npc_stall  ;
+    assign   test_if_pc     = if_id_pc          ;
+    assign   test_if_inst   = if_id_inst        ;
+    assign   test_id_pc     = id_pc             ;
+    assign   test_id_inst   = id_inst           ;
+    assign   test_ex_pc     = ex_pc             ;
+    assign   test_ex_inst   = ex_inst           ;
+    assign   test_ls_pc     = ls_pc             ;
+    assign   test_ls_inst   = ls_inst           ;
+    assign   test_wb_pc     = wb_pc             ;
+    assign   test_wb_inst   = wb_inst           ;
+    assign   npc_stall      = temp_npc_stall    ;
+    assign   negedge_stall  = stall_negedge     ;
+    assign   posedge_stall  = stall_posedge     ;
+    ysyx_22050598_sirv_gnrl_dfflr #(1)  stall_dfflr(1'b1, temp_npc_stall, npc_stall_r, clk, rst);
 `endif
 endmodule
