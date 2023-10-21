@@ -1,1 +1,3 @@
-
+nemu: less than 1 min
+npc: between 15 min and 16 min
+my cpu is i7-10875h
