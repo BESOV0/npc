@@ -20,13 +20,11 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
 	int x = ctl->x;
 	int y = ctl->y;
 	int w = ctl->w;
-	int h = ctl->h;
+	//int h = ctl->h;
 	uint32_t *pixels = ctl->pixels;
 	uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;
-  	for (int i = y; i < y+h; i++) {
-  		for(int j = x; j < x+w;j++){
-  			fb[j+i*(inl(VGACTL_ADDR) >> 16)] = pixels[(j-x)+(i-y)*w];//(inl(VGACTL_ADDR) >> 16) is width of screen
-  		}
+  	for(int i = 0; i < w; i++){
+  		fb[i + x + y * (inl(VGACTL_ADDR) >> 16)] = pixels[i];
   	}
   	if (ctl->sync) {
     		outl(SYNC_ADDR, 1);
