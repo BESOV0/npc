@@ -33,25 +33,6 @@ int NDL_PollEvent(char *buf, int len) {
 }
 
 void NDL_OpenCanvas(int *w, int *h) {
-
-  if (getenv("NWM_APP")) {
-    int fbctl = 4;
-    fbdev = 5;
-    screen_w = *w; screen_h = *h;
-    char buf[128];
-    int len = sprintf(buf, "%d %d", screen_w, screen_h);
-    // let NWM resize the window and create the frame buffer
-    write(fbctl, buf, len);
-    while (1) {
-      // 3 = evtdev
-      int nread = read(3, buf, sizeof(buf) - 1);
-      if (nread <= 0) continue;
-      buf[nread] = '\0';
-      if (strcmp(buf, "mmap ok") == 0) break;
-    }
-    close(fbctl);
-  }
-  
   char buf[32] = {};
   int fd = open("/proc/dispinfo", 0, 0);
   if (read(fd, buf, sizeof(buf))) {
@@ -69,30 +50,17 @@ void NDL_OpenCanvas(int *w, int *h) {
 	*w = screen_w;
 	*h = screen_h;
   }
-  
 }
 
 
-//#define Middle
 void NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
   	int fd = open("/dev/fb",O_RDWR);
-  	//assert(fd != -1);
-  	int temp_x = x;
-  	int temp_y = y;
-  	int temp_h = h;
-  	//printf("screen_w is %d\n",screen_w);
-  	//printf("h is %d\n",h);
-  	#ifdef Middle
-  	temp_x = (screen_w - w) / 2;
-  	//printf("temp_x is %d\n",temp_x);
-  	temp_y = (screen_h - h) / 2;
-  	temp_h = h + temp_y;
-  	#endif
-  	for(int i = temp_y; i < temp_h; i++){
-    		lseek(fd, (temp_x + i*screen_w) * 4, SEEK_SET);//same as am_gpu_fbdraw (x + i*screen_w) is offset
-    		write(fd, pixels + (i-temp_y) * w , w*4);//int fd, const void* buf, size_t count write a line every time
+  	assert(fd != -1);
+  	int temp_x = (screen_w - w) / 2;	
+  	for(int i = 0 ; i < h; i++){
+    		lseek(fd, (temp_x + i * screen_w) * 4, SEEK_SET);//same as am_gpu_fbdraw (x + i*screen_w) is offset
+    		write(fd, pixels + i * w , w * 4);//int fd, const void* buf, size_t count write a line every time
   	}
-  	
   	close(fd);
   	return;
 }
