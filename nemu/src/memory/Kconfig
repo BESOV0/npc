@@ -26,7 +26,7 @@ endchoice
 
 config MTRACE
   bool "Enable MTRACE"
-  default y
+  default n
 
 config MEM_RANDOM
   depends on MODE_SYSTEM && !DIFFTEST && !TARGET_AM
