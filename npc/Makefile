@@ -19,8 +19,10 @@ clean:
 sim:	
 	verilator ${VERILATOR_FLAGS} ${GCC_LDFLAGS}
 	make -C obj_dir -f Vnpc.mk Vnpc
-	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
+	#$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 run:
+	verilator ${VERILATOR_FLAGS} ${GCC_LDFLAGS}
+	make -C obj_dir -f Vnpc.mk Vnpc
 	./obj_dir/Vnpc ${RUN_FLAGS} $(IMG)
 prof:
 	gprof ./obj_dir/Vnpc gmon.out >> gprof.out
