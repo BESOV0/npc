@@ -1,6 +1,6 @@
 include $(AM_HOME)/scripts/isa/riscv64.mk
 
-NPC_HOME = ../npc/
+#NPC_HOME = ../npc/
 AM_SRCS := riscv/npc/start.S \
            riscv/npc/trm.c \
            riscv/npc/ioe.c \
