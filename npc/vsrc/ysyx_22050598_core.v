@@ -14,6 +14,7 @@ module ysyx_22050598_core(
         output          npc_stall           ,
         output          negedge_stall       ,
         output          posedge_stall       ,
+        output          lsu_device          ,
 `endif
         input           clk                 ,
         input           rst                 ,
@@ -146,6 +147,7 @@ module ysyx_22050598_core(
 `ifdef ysyx_22050598_Test
     wire [31:0]    wb_inst           ;
     wire [63:0]    wb_pc             ;
+    wire 	   lsu_addr_is_device;
 `endif
     wire          ls_unalign_stall   ;
     wire [63:0]   ls_wb_load_data    ;
@@ -422,6 +424,9 @@ module ysyx_22050598_core(
                         );
     /****************************************************lsu*******************************************************/
     ysyx_22050598_lsu u_ysyx_22050598_lsu (
+    `ifdef ysyx_22050598_Test
+    			.lsu_addr_is_device	 (lsu_addr_is_device	),
+    `endif
                         .clk                     (clk                   ),
                         .rst                     (rst                   ),
                         .ls_store_data           (ls_store_data         ),
@@ -455,6 +460,8 @@ module ysyx_22050598_core(
                         .ls_wb_inst_o            (wb_inst               ),
                         .ls_wb_pc                (ls_pc                 ),
                         .ls_wb_pc_o              (wb_pc                 ),
+                        .ls_wb_device            (lsu_addr_is_device    ),
+                        .ls_wb_device_o          (lsu_device            ),
     `endif
                         .clk                     (clk                   ),
                         .rst                     (rst                   ),
