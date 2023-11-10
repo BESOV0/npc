@@ -14,10 +14,11 @@ module ysyx_22050598_cpu(
     output          npc_stall        , 
     output          negedge_stall    ,
     output          posedge_stall    ,
+    output          addr_is_device   ,
     `endif
-    input            clk             ,
-    input            rst             ,
-    output           M_AXI_AWID      ,
+    	input            clk             ,
+    	input            rst             ,
+    	output           M_AXI_AWID      ,
 	output [63:0]    M_AXI_AWADDR    ,
 	output [7:0]     M_AXI_AWLEN     ,
 	output [2:0]     M_AXI_AWSIZE    ,
@@ -57,6 +58,7 @@ module ysyx_22050598_cpu(
 	input            M_AXI_RVALID    ,
 	output           M_AXI_RREADY
 );
+
     wire [63:0]   ifu_mem_addr        ;
     wire          ifu_mem_valid       ;
     wire [127:0]  ifu_mem_data        ;
@@ -95,6 +97,7 @@ ysyx_22050598_core u_ysyx_22050598_core(
     .npc_stall           (npc_stall         ), 
     .negedge_stall       (negedge_stall     ),
     .posedge_stall       (posedge_stall     ),
+    .lsu_device          (addr_is_device    ),
     `endif
     .clk                 (clk               ),
     .rst                 (rst               ),
