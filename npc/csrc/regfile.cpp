@@ -33,10 +33,12 @@ unsigned long int isa_reg_str2val(const char *s) {
 	return 0;
 }
 #ifdef DIFFTEST
-bool checkregs(reg_struct *ref, reg_struct *dut) {
+bool checkregs(reg_struct *ref, reg_struct *dut, uint32_t inst) {
   if(ref->pc != dut->pc){
     Log("%s",ANSI_FMT("DIFFTEST PC IS FALIED!", ANSI_FG_RED));
     Log("NEMU PC IS 0x%016lx NPC PC IS 0x%016lx",ref->pc,dut->pc);
+    Log("The inst is 0x%08x",inst);
+    dump_gpr();
     return false;
   }
   
@@ -45,6 +47,8 @@ bool checkregs(reg_struct *ref, reg_struct *dut) {
       Log("%s",ANSI_FMT("DIFFTEST REG IS FALIED!", ANSI_FG_RED));
       Log("NEMU NEXT PC IS 0x%016lx NPC NEXT PC IS 0x%016lx",ref->pc,dut->pc);
       Log("REG IS %s NEMU IS 0x%016lx NPC IS 0x%016lx",regs[i],ref->gpr[i],dut->gpr[i]);
+      Log("The inst is 0x%08x",inst);
+      dump_gpr();
       return false;
     }
   }
