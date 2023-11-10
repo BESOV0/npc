@@ -87,7 +87,7 @@ void simmain(unsigned long int exectime);
 void dump_gpr();
 uint8_t* guest_to_host(long long paddr);
 /************************difftest*********************/
-#define DIFFTEST 1
+//#define DIFFTEST 1
 #ifdef DIFFTEST
 typedef struct {
   uint64_t gpr[32];
