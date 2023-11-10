@@ -12,14 +12,14 @@ module npc(
     output [63:0]   test_wb_pc       ,
     output [31:0]   test_wb_inst     ,
     output          npc_stall        , 
-	output          negedge_stall    ,
-	output    		posedge_stall    ,
-	output          addr_is_device   ,
+    output          negedge_stall    ,
+    output    	    posedge_stall    ,
+    output          addr_is_device   ,
     `endif
     input            clk             ,
     input            rst             
 );
-    wire           AXI_AWID      ;
+   	wire           AXI_AWID      ;
 	wire [63:0]    AXI_AWADDR    ;
 	wire [7:0]     AXI_AWLEN     ;
 	wire [2:0]     AXI_AWSIZE    ;
