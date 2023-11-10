@@ -5,6 +5,8 @@ module ysyx_22050598_LS_WB (
     output  [31:0]    ls_wb_inst_o      ,
     input   [63:0]    ls_wb_pc          ,
     output  [63:0]    ls_wb_pc_o        ,
+    input             ls_wb_device      ,
+    output            ls_wb_device_o    ,
     `endif
     input         clk                   ,
     input         rst                   ,
@@ -34,10 +36,13 @@ module ysyx_22050598_LS_WB (
     `ifdef ysyx_22050598_Test
     wire   [31:0]    ls_wb_inst_r    ;
     wire   [63:0]    ls_wb_pc_r      ;
+    wire             ls_wb_device_r  ;
     ysyx_22050598_sirv_gnrl_dfflr #(32)  ls_wb_inst_dfflr(ls_wb_en, ls_wb_inst, ls_wb_inst_r, clk, rst);
     ysyx_22050598_sirv_gnrl_dfflr #(64)  ls_wb_pc_dfflr  (ls_wb_en, ls_wb_pc  , ls_wb_pc_r  , clk, rst);
+    ysyx_22050598_sirv_gnrl_dfflr #(1)   ls_device_dfflr (ls_wb_en, ls_wb_device , ls_wb_device_r  , clk, rst);
     assign ls_wb_inst_o = ls_wb_inst_r ;
     assign ls_wb_pc_o   = ls_wb_pc_r ;
+    assign ls_wb_device_o = ls_wb_device_r ;
     `endif
     
     assign ls_wb_rd_data_o =  ls_wb_rd_data_r ;
