@@ -1,4 +1,8 @@
+`include "ysyx_22050598_defines.v"
 module ysyx_22050598_lsu (
+    `ifdef ysyx_22050598_Test
+    output 	    lsu_addr_is_device  ,	
+    `endif
     input           clk             ,
     input           rst             ,
     input [63:0]    ls_store_data   ,
@@ -17,10 +21,11 @@ module ysyx_22050598_lsu (
     output          lsu_is_device   ,
     output [7:0]    lsu_wmask       ,
     input  [127:0]  lsu_mem_rdata   ,
-    input           lsu_mem_ready
+    input           lsu_mem_ready   
 );
 /****************************************************Device******************************************************/
     wire addr_is_device = (ls_loc[31] & ~ls_loc[30] & ls_loc[29] & ~ls_loc[28]) ;
+    assign lsu_addr_is_device = addr_is_device ;
 /*****************************************************FSM********************************************************/
     wire cpu_data_ok ;
     wire unalign_state_r                               ; 
