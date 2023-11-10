@@ -39,14 +39,20 @@ void init_difftest(char *ref_so_file, long img_size) {
   ref_difftest_regcpy(&dut_reg_cpy, DIFFTEST_TO_REF);
 }
 
-void difftest_one_step() {
-  ref_difftest_exec(1);
+void difftest_one_step(char a) {
+	if(a == 0)
+  		ref_difftest_exec(1);
+  	else{
+  		reg_struct temp_dut, temp_ref;
+  		temp_dut = get_dut_state(cpu_gpr,dut_pc);
+  		ref_difftest_regcpy(&temp_dut,DIFFTEST_TO_REF);
+  	}
 }
-bool difftest_check() {
+bool difftest_check(uint32_t inst) {
   reg_struct ref, dut;
   ref_difftest_regcpy(&ref, DIFFTEST_TO_DUT);
   dut = get_dut_state(cpu_gpr,dut_pc);
-  return checkregs(&ref, &dut);
+  return checkregs(&ref, &dut, inst);
 }
 
 #endif
