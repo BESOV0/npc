@@ -14,6 +14,7 @@ module npc(
     output          npc_stall        , 
 	output          negedge_stall    ,
 	output    		posedge_stall    ,
+	output          addr_is_device   ,
     `endif
     input            clk             ,
     input            rst             
@@ -72,6 +73,7 @@ ysyx_22050598_cpu u_ysyx_22050598_cpu(
     .npc_stall      (npc_stall      ), 
 	.negedge_stall  (negedge_stall	),
 	.posedge_stall	(posedge_stall	),
+	.addr_is_device (addr_is_device	),
     `endif
     .clk            (clk            ),
     .rst            (rst            ),
