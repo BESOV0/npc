@@ -87,15 +87,15 @@ void simmain(unsigned long int exectime);
 void dump_gpr();
 uint8_t* guest_to_host(long long paddr);
 /************************difftest*********************/
-//#define DIFFTEST 1
+#define DIFFTEST 1
 #ifdef DIFFTEST
 typedef struct {
   uint64_t gpr[32];
   uint64_t pc;
 } reg_struct;
-void difftest_one_step();
-bool difftest_check();
-bool checkregs(reg_struct *ref, reg_struct *dut);
+void difftest_one_step(char a);
+bool difftest_check(uint32_t inst);
+bool checkregs(reg_struct *ref, reg_struct *dut, uint32_t inst);
 reg_struct get_dut_state(uint64_t *dut_reg,uint64_t pc);
 void init_difftest(char *ref_so_file, long img_size);
 #endif
