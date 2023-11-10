@@ -353,6 +353,10 @@ void simmain(unsigned long int exectime){
     uint64_t timer_start = get_time();
     while (sc_time_stamp() < temp && (ebreak_flag == 0) && (NPC_STOP == 0)) 
     {		
+    		#ifdef DIFFTEST
+    		char skip_device = top->addr_is_device ;
+    		uint32_t difftest_inst = top->test_wb_inst ;
+    		#endif
     		single_cycle();
     		/*
                 if (exectime != -1){
@@ -368,7 +372,7 @@ void simmain(unsigned long int exectime){
                 NPC_STOP = 1;
                 temp = main_time + 1;
                 }  
-    //5 stage core inst start with 0x00000000 skip it and bubble is 0x00000013 skip it 
+    		//5 stage core inst start with 0x00000000 skip it and bubble is 0x00000013 skip it 
 		bool skip_wb_inst_req  = (top->test_wb_inst != 0x00000013) && (top->test_wb_inst != 0);
 		//stall posedge is executed one inst but at the first time cpu execute inst 0x00000000 so skip it
 		//when npc_stall is hign cpu is stalled so skip it
@@ -377,11 +381,11 @@ void simmain(unsigned long int exectime){
 		bool skip_wb_stall_req = ((top->posedge_stall == 1) && top->test_wb_pc != 0x80000000) || (top->npc_stall == 0) && (top->negedge_stall == 0);
                 if(skip_wb_inst_req && skip_wb_stall_req){
                 	inst_num++;
-                #ifdef DIFFTEST
-                difftest_one_step();
-                //Log("nemu exec once at cycle %ld",cycle_num);  
+                #ifdef DIFFTEST              
                 dut_pc = top->test_wb_pc ;
-                if(!difftest_check())
+                difftest_one_step(skip_device);
+                //Log("nemu exec once at cycle %ld",cycle_num);  
+                if(!difftest_check(difftest_inst))
                 	ebreak_flag = 1 ;
                 #endif
                 }
