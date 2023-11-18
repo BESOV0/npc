@@ -58,7 +58,7 @@ module ysyx_22050598_exu_csr (
     wire [63:0] write_csr_and_data1 = read_csr_data & {64{write_csr_and}};
     wire [63:0] write_csr_and_data2 = ({64{ex_csr_bus_i[3]}} & csr_reg_i)  | 
                                       ({64{ex_csr_bus_i[0]}} & csr_zimm_i) ; 
-    wire [63:0] write_csr_and_data = write_csr_or_data1 & (~write_csr_or_data2);
+    wire [63:0] write_csr_and_data = write_csr_and_data1 & (~write_csr_and_data2);
 
     assign read_csr_data = ({64{csr_mstatus_ena}} & csr_mstatus_data_r) |
                            ({64{csr_mtvec_ena}}   & csr_mtvec_data_r  ) | 
